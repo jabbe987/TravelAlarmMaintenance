@@ -25,6 +25,17 @@ db.connect(err => {
 });
 
 
+// ✅ API Route to Fetch Words
+app.get('/api/words', (req, res) => {
+    db.query('SELECT * FROM words', (err, results) => {
+        if (err) {
+            console.error('Error fetching words:', err);
+            return res.status(500).json({ error: 'Database query error' });
+        }
+        res.json(results); // ✅ Send retrieved words as JSON
+    });
+});
+
 // Sample API route
 app.get('/users', (req, res) => {
     db.query('SELECT * FROM users', (err, results) => {
