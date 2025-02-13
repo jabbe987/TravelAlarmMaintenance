@@ -2,6 +2,7 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Test from './components/Test';  // ✅ Correct import with uppercase "T"
+import Testroutes from './components/Testroutes';
 
 function App() {
   return (
@@ -24,7 +25,7 @@ function App() {
       {/* ✅ Render the Test component here */}
       <main>
         <h2>Words from Database</h2>
-        <Test />
+        <Testroutes/>
       </main>
     </div>
   );
