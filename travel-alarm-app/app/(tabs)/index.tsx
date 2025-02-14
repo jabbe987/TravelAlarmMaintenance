@@ -12,8 +12,8 @@ export default function HomeScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Welcome to Travel Alarm</Text>
+    <View style={styles.titleContainer}>
+      <Text style={styles.titleContainer}>Welcome to Travel Alarm</Text>
       <Button title="Go to User View" onPress={() => router.push("/UserView")} />
     </View>
   );
@@ -21,13 +21,15 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   titleContainer: {
-    flexDirection: 'row',
+    marginTop: 40,
+    flexDirection: 'column',
     alignItems: 'center',
-    gap: 8,
+    backgroundColor: '#25299e',
+    gap: 50,
   },
   stepContainer: {
     gap: 8,
-    marginBottom: 8,
+    marginTop: 40,
   },
   reactLogo: {
     height: 178,
