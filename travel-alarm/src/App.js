@@ -1,8 +1,12 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Test from './components/Test';
+
+import Test from './components/Test';  // ✅ Correct import with uppercase "T"
+import Testroutes from './components/Testroutes';
+
 import MapComponent from "./components/Map";
+
 
 function App() {
   return (
@@ -24,6 +28,9 @@ function App() {
 
       <main>
         <h2>Words from Database</h2>
+
+        <Testroutes/>
+
         <Test />
 
         {/* ✅ Debug text before rendering MapComponent */}
@@ -35,6 +42,7 @@ function App() {
 
         {/* ✅ Debug text after rendering MapComponent */}
         <p>✅ After MapComponent</p>
+
       </main>
     </div>
   );

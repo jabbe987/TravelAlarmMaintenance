@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const tripRoutes = require('./tripRoutes'); 
 
 const app = express();
 app.use(cors());
@@ -60,6 +61,8 @@ console.log('Connected to database');
 //         }
 //     });
 // });
+
+app.use('/api', tripRoutes);
 
 // ✅ API Route to Fetch Words
 app.get('/api/words', async (req, res) => {
