@@ -1,8 +1,12 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+
 import Test from './components/Test'; 
 import GetLocation from './components/location';
+import Testroutes from './components/Testroutes';
+import MapComponent from "./components/Map";
+
 
 function App() {
   return (
@@ -22,12 +26,26 @@ function App() {
     //     </a>
     //   </header> */}
 
-      {/* ✅ Render the Test component here */}
       <main>
         <h2>Words from Database</h2>
+
+        <Testroutes/>
+
         <Test />
+
         
         <GetLocation/>
+
+        {/* ✅ Debug text before rendering MapComponent */}
+        <p>✅ Before MapComponent</p>
+
+        {/* ✅ Ensure the map is properly included */}
+        <h1>Travel Tracker Map</h1>
+        <MapComponent />
+
+        {/* ✅ Debug text after rendering MapComponent */}
+        <p>✅ After MapComponent</p>
+
       </main>
     </div>
   );
