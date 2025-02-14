@@ -12,9 +12,14 @@ export default function HomeScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.titleContainer}>
-      <Text style={styles.titleContainer}>Welcome to Travel Alarm</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Welcome to Travel Alarm</Text>
+
+      {/* Button to User View */}
       <Button title="Go to User View" onPress={() => router.push("/UserView")} />
+
+      {/* Button to Map View */}
+      <Button title="Go to Map View" onPress={() => router.push("/Map")} />
     </View>
   );
 }
@@ -25,7 +30,15 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: '#25299e',
+    padding: 20,
     gap: 50,
+  },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#25299e",
+    padding: 20,
   },
   stepContainer: {
     gap: 8,
@@ -37,5 +50,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: 'absolute',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 30,
   },
 });

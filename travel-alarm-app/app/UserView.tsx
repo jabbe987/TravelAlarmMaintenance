@@ -17,7 +17,7 @@ const UserView: React.FC = () => {
     // };
 
     const fetchWords = () => {
-        axios.get('http://localhost:3000/api/words')  // //http://localhost:3000/api/words
+        axios.get('http://192.168.1.119:3000/api/words')  // //http://localhost:3000/api/words
           .then(response => {
             console.log(response.data); // Log response to debug
             setWords(JSON.stringify(response.data, null, 2)); // Convert to readable string

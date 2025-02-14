@@ -29,6 +29,7 @@ const MapComponent = () => {
       navigator.geolocation.getCurrentPosition(
         (location) => {
           setPosition([location.coords.latitude, location.coords.longitude]);
+          console.log("Location updated:", position);
         },
         (error) => {
           console.error("Error getting location:", error);
