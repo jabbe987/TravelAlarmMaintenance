@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 
 import Test from './components/Test'; 
-import GetLocation from './components/location';
+import GetLocation from './utils/UserLocation';
 import Testroutes from './components/Testroutes';
 import MapComponent from "./components/Map";
 
@@ -32,9 +32,6 @@ function App() {
         <Testroutes/>
 
         <Test />
-
-        
-        <GetLocation/>
 
         {/* ✅ Debug text before rendering MapComponent */}
         <p>✅ Before MapComponent</p>
