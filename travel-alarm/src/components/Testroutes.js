@@ -6,7 +6,7 @@ function Testroutes() {
   const [showTrips, setShowTrips] = useState(false);
 
   const fetchTrips = () => {
-    axios.get('http://localhost:3001/api/trips')  // ✅ Ensure this matches your backend
+    axios.get('http://localhost:3000/api/trips')  // ✅ Ensure this matches your backend
       .then(response => {
         setTrips(response.data);
         setShowTrips(true);  // ✅ Show trips when fetched

@@ -32,6 +32,8 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="UserView" options={{ title: "User View" }} />
+        <Stack.Screen name="Map" options={{ title: "Map View" }} />
+        <Stack.Screen name="WebMap" options={{title: "Web Map View" }}/>
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
