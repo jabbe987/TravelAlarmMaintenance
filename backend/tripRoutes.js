@@ -23,8 +23,8 @@ router.get('/trips', (req, res) => {
 
 // Get trip details by ID
 router.get('/trips/:id', (req, res) => {
-    const tripId = req.params.id;  // ✅ Fixed: Use req.params.id instead of undefined tripId
-    db.query('SELECT * FROM trips WHERE id = ?', [tripId], (err, results) => {
+    const tripId = req.params.id;  
+    db.query('SELECT * FROM Trip WHERE Trip_ID = ?', [tripId], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) return res.status(404).json({ error: 'Trip not found' });
         res.json(results);
@@ -33,10 +33,15 @@ router.get('/trips/:id', (req, res) => {
 
 // Add a new trip
 router.post('/trips', (req, res) => {
-    const { user_id, start_location, end_location, start_time, eta } = req.body;
+    const { Alarm_ID, User_ID, Start, End, ETA } = req.body;
+
+    if (!User_ID || !Start || !End || !ETA) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
     db.query(
-        'INSERT INTO trips (user_id, start_location, end_location, start_time, eta) VALUES (?, ?, ?, ?, ?)',
-        [user_id, start_location, end_location, start_time, eta],
+        'INSERT INTO Trip (Alarm_ID, User_ID, Start, End, ETA) VALUES (?, ?, ?, ?, ?)',
+        [Alarm_ID || null, User_ID, Start, End, ETA],
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ message: 'Trip added successfully', id: results.insertId });
