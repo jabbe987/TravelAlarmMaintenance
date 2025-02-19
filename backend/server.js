@@ -38,6 +38,7 @@ const db = mysql.createPool({
 // });
 
 console.log('Connected to database');
+console.log(tripRoutes);
 
 
 // // ✅ API Route to Fetch Words
