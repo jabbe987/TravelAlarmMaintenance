@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { useMap } from "react-leaflet";
 // Component to dynamically update the map view
-const LocationUpdater = ({ position }) => {
+const LocationUpdater: React.FC<{ position: number[] }> = ({ position }) => {
     const map = useMap();
     
     useEffect(() => {

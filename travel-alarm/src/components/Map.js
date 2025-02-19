@@ -1,16 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
-import L from "leaflet";
+import L, { setOptions } from "leaflet";
 import "leaflet/dist/leaflet.css";
-
-// Component to dynamically update the map view
-const LocationUpdater = ({ position }) => {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(position, 13);
-  }, [position, map]);
-  return null;
-};
+import  LocationUpdater  from "./Location.js"
+import { getLocation, updateLocation, stopUpdatingLocation, errorHandler } from "../utils/UserLocation";
 
 // Define custom marker icon
 const customIcon = new L.Icon({
@@ -21,49 +14,36 @@ const customIcon = new L.Icon({
 });
 
 const MapComponent = () => {
-  const defaultPosition = [59.3293, 18.0686]; // Stockholm, Sweden (default)
-  const [position, setPosition] = useState(defaultPosition);
+  const [location, setLocation] = useState([0,0]);
+  const [permission, setPermission] = useState('not-asked');
+  const [watchPosId, setWatchPosId] = useState(null);
+  const map = useRef(null)
 
   useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (location) => {
-          setPosition([location.coords.latitude, location.coords.longitude]);
-          console.log("Location updated:", position);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        }
-      );
-    } else {
-      console.warn("Geolocation is not supported by this browser.");
-    }
+    console.log("RUNNING")
+
+    getLocation(permission, setPermission, setLocation, location, {}, setWatchPosId)
   }, []);
 
   return (
-    <MapContainer center={position} zoom={13} style={{ height: "500px", width: "100%" }}>
+    <MapContainer whenCreated={(mapInstance) => (map.current = mapInstance)} center={location} zoom={13} style={{ height: "500px", width: "100%" }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <LocationUpdater position={position} />
+      <LocationUpdater position={location} />
 
       {/* Red Circle Around the Position */}
       <Circle
-        center={position}
+        center={location}
         radius={500} // Radius in meters
         pathOptions={{ fillColor: "red", color: "red", fillOpacity: 0.4 }}
       />
-
-      <Marker position={position} icon={customIcon}>
+      
+      <Marker position={location} icon={customIcon}>
         <Popup>
           <div style={{ textAlign: "center" }}>
-            <p><strong>Your current location!</strong><br />Latitude: {position[0]}<br />Longitude: {position[1]}</p>
+            <p><strong>Your current location!</strong><br />Latitude: {location[0]}<br />Longitude: {location[1]}</p>
           </div>
         </Popup>
-      </Marker>
+      </Marker> 
     </MapContainer>
   );
 };

@@ -3,11 +3,11 @@ import { View, StyleSheet } from "react-native";
 import LeafletMap from "@/components/LeafletMap";
 
 const WebMap = () => {
-  return (
-    <View style={styles.container}>
-      <LeafletMap />
-    </View>
-  );
+  // return (
+  //   <View style={styles.container}>
+  //     <LeafletMap />
+  //   </View>
+  // );
 };
 
 export default WebMap;

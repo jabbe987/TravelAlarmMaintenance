@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { Platform } from 'react-native';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -16,6 +17,7 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  console.log(Platform.OS)
 
   useEffect(() => {
     if (loaded) {
@@ -32,7 +34,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="UserView" options={{ title: "User View" }} />
-        <Stack.Screen name="Map" options={{ title: "Map View" }} />
+        { Platform.OS !== "web" && <Stack.Screen name="Map" options={{ title: "Map View" }} />}
         <Stack.Screen name="WebMap" options={{title: "Web Map View" }}/>
         <Stack.Screen name="+not-found" />
       </Stack>
