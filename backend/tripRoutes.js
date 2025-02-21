@@ -16,6 +16,7 @@ const db = mysql.createConnection({
 // List all trips
 router.get('/trips', (req, res) => {
     db.query('SELECT * FROM Trip', (err, results) => {
+        console.log(results)
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });

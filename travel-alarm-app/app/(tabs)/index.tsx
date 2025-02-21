@@ -22,7 +22,7 @@ export default function HomeScreen() {
       { Platform.OS !== "web" && <Button title="Go to Map View" onPress={() => router.push("/Map")} />}
 
       {/* Button to Map View */}
-      <Button title="Go to Map View Leaflet" onPress={() => router.push("/WebMap")} />
+      { Platform.OS === "web" && <Button title="Go to Map View Leaflet" onPress={() => router.push("/WebMap")} />}
     </View>
   );
 }

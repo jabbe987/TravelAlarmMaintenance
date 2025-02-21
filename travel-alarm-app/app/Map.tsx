@@ -1,34 +1,59 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import MapView, { Marker, Circle, Polyline } from "react-native-maps";
+import { View, StyleSheet} from "react-native";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import polyline from "@mapbox/polyline";
+import DropDown from "./DropDown";
+import { Trip, RootStackParamList  } from './types';
+import { RouteProp, useRoute } from '@react-navigation/native';
 
 const OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving";
+
+type MapScreenRouteProp = RouteProp<RootStackParamList, 'Map'>;
 
 type RouteCoordinate = { latitude: number; longitude: number };
 const MapComponent = () => {
   const [routeCoordinates, setRouteCoordinates] = useState<RouteCoordinate[]>([]);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [origin, setOrigin] = useState<{ latitude: number; longitude: number } | null>(null); // San Francisco
-  const [destination, setDestination] = useState<{ latitude: number; longitude: number } | null>(null); // Nearby point
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [origin, setOrigin] = useState<{ latitude: number; longitude: number } | null>(null); 
+  const [destination, setDestination] = useState<{ latitude: number; longitude: number } | null>(null); 
   const mapRef = useRef<MapView | null>(null);
+  const route = useRoute<MapScreenRouteProp>();
+  const [trip, setTrip] = useState<Trip | null>(null);
+
+  useEffect (() => {
+    if (trip) {
+      const start = trip.Start;
+      const end = trip.End;
+
+      const trimmedStart = start.split(',').map((item) => parseFloat(item.trim()));
+      const trimmedEnd = end.split(',').map((item) => parseFloat(item.trim()));
+
+      setOrigin({latitude: trimmedStart[0], longitude: trimmedStart[1]});
+      setDestination({latitude: trimmedEnd[0], longitude: trimmedEnd[1]})
+    }
+    
+  }, [trip])
 
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
+        console.error("Permission to access location was denied");
         return;
       }
 
       let currentLocation = await Location.getCurrentPositionAsync({});
       setUserLocation(currentLocation.coords);
-      setOrigin(currentLocation.coords);
-      setDestination({latitude: 59.839342722178976, longitude: 17.647042311387317})
     })();
   }, []);
+
+  useEffect(() => {
+    if (route.params?.trip) {
+      const chosenTrip = route.params.trip;
+      setTrip(chosenTrip);
+    }
+  }, [route.params?.trip]);
 
   useEffect(() => {
     fetchOSRMRoute();
@@ -48,7 +73,6 @@ const MapComponent = () => {
 
           setRouteCoordinates(routeCoords);
 
-          // Auto-zoom map to fit the route
           if (mapRef.current) {
             mapRef.current.fitToCoordinates(routeCoords, {
               edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
@@ -64,6 +88,7 @@ const MapComponent = () => {
 
   return (
     <View style={styles.container}>
+      <DropDown />
       {userLocation &&
       <MapView
         ref={mapRef}
@@ -75,16 +100,13 @@ const MapComponent = () => {
           longitudeDelta: 0.05,
         }}
         showsUserLocation
-        followsUserLocation
       >
-        {/* Markers */}
         { origin && destination ? (
           <>
           <Marker coordinate={origin} title="Start" />
           <Marker coordinate={destination} title="Destination" /> 
           </> ) : null}
 
-        {/* Draw Route */}
         {routeCoordinates.length > 0 && (
           <Polyline coordinates={routeCoordinates} strokeWidth={4} strokeColor="blue" />
         )}
@@ -117,5 +139,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "gray",
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    fontSize: 30, 
+    color: 'black',
+    padding: 10,
   },
 });
