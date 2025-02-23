@@ -13,21 +13,39 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Welcome to Travel Alarm</Text>
+      <Text style={styles.title}>Welcome to Travel Alarm</Text>
+
+      {/* Button to User View */}
       <Button title="Go to User View" onPress={() => router.push("/UserView")} />
+
+      {/* Button to Map View */}
+      { Platform.OS !== "web" && <Button title="Go to Map View" onPress={() => router.push("/Map")} />}
+
+      {/* Button to Map View */}
+      { Platform.OS === "web" && <Button title="Go to Map View Leaflet" onPress={() => router.push("/WebMap")} />}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   titleContainer: {
-    flexDirection: 'row',
+    marginTop: 40,
+    flexDirection: 'column',
     alignItems: 'center',
-    gap: 8,
+    backgroundColor: '#25299e',
+    padding: 20,
+    gap: 50,
+  },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#25299e",
+    padding: 20,
   },
   stepContainer: {
     gap: 8,
-    marginBottom: 8,
+    marginTop: 40,
   },
   reactLogo: {
     height: 178,
@@ -35,5 +53,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: 'absolute',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 30,
   },
 });
