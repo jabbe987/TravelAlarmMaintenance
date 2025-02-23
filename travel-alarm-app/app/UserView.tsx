@@ -17,7 +17,7 @@ const UserView: React.FC = () => {
     // };
 
     const fetchWords = () => {
-        axios.get('http://192.168.68.119:3000/api/words')  // //http://localhost:3000/api/words
+        axios.get('http://155.4.245.117:8000/api/words')  // //http://localhost:3000/api/words
 
         // axios.get('http://155.4.245.117:8000/api/words')  // //http://localhost:3000/api/words
 
