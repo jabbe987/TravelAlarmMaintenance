@@ -13,7 +13,7 @@ router.get('/distance', async (req, res) => {
         return res.status(400).json({ error: 'Origins and destinations are required.' });
     }
 
-    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origins)}&destinations=${encodeURIComponent(destinations)}&key=${GOOGLE_MAPS_API_KEY}`;
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origins)}&destinations=${encodeURIComponent(destinations)}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
 
     try {
         const response = await axios.get(url);
