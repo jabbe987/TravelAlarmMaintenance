@@ -117,9 +117,9 @@ const MapComponent = () => {
         )}
       </MapView> }
 
-      <View style={styles.mapHeader}>
+      <View style={styles.mapBottomBar}>
         <DropDown />
-        {estimatedTimeArrrival && <Text style={styles.ETA}>{estimatedTimeArrrival}</Text> }
+        {estimatedTimeArrrival && <Text style={styles.ETA}>{"ETA: " + estimatedTimeArrrival}</Text> }
       </View>
     </View>
   );
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
   },
-  mapHeader: {
+  mapBottomBar: {
     backgroundColor: "black",
     width: "100%",
     height: 200,
