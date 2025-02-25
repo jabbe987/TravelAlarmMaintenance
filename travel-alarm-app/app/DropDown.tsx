@@ -26,7 +26,7 @@ const DropDown = () => {
   };
 
   useEffect(() => {
-    axios.get('http://192.168.68.119:3000/api/trips')
+    axios.get('http://155.4.245.117:8000/api/trips')
           .then(response => {
             setTrips(response.data);
           })
@@ -56,7 +56,7 @@ const DropDown = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View>
       <TouchableOpacity onPress={openModal} style={styles.button}>
         <Text style={styles.buttonText}> {tripName ? tripName : 'Select a Trip'} </Text>
       </TouchableOpacity>
@@ -95,13 +95,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    marginTop: 100,
+    padding: 10,
   },
   button: {
     backgroundColor: 'blue',
-    padding: 20,
+    padding: 10,
     borderRadius: 5,
+    alignSelf: "flex-start",
   },
   buttonText: {
     color: 'white',

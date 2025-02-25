@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet} from "react-native";
+import { View, StyleSheet, Text} from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import polyline from "@mapbox/polyline";
@@ -17,14 +17,17 @@ const MapComponent = () => {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [origin, setOrigin] = useState<{ latitude: number; longitude: number } | null>(null); 
   const [destination, setDestination] = useState<{ latitude: number; longitude: number } | null>(null); 
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [estimatedTimeArrrival, setETA] = useState<string | null>(null)
+
   const mapRef = useRef<MapView | null>(null);
   const route = useRoute<MapScreenRouteProp>();
-  const [trip, setTrip] = useState<Trip | null>(null);
 
   useEffect (() => {
     if (trip) {
       const start = trip.Start;
       const end = trip.End;
+      const ETA = trip.ETA;
 
       const trimmedStart = start.split(',').map((item) => parseFloat(item.trim()));
       const trimmedEnd = end.split(',').map((item) => parseFloat(item.trim()));
@@ -88,7 +91,10 @@ const MapComponent = () => {
 
   return (
     <View style={styles.container}>
-      <DropDown />
+      <View style={styles.mapHeader}>
+        <DropDown />
+        {estimatedTimeArrrival && <Text style={styles.ETA}>{estimatedTimeArrrival}</Text> }
+      </View>
       {userLocation &&
       <MapView
         ref={mapRef}
@@ -147,5 +153,14 @@ const styles = StyleSheet.create({
     fontSize: 30, 
     color: 'black',
     padding: 10,
+  },
+  ETA: {
+    color: "white",
+    fontSize: 18,
+  },
+  mapHeader: {
+    backgroundColor: "black",
+    width: "100%",
+    height: 100,
   },
 });
