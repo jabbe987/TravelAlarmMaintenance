@@ -19,7 +19,7 @@ const DropDown = () => {
   const closeModal = () => setIsModalVisible(false);
 
   const navigateToDetails = (value: number) => {
-    const trip = trips.find((trip) => trip.Trip_ID === value);
+    const trip = trips.find((trip: { Trip_ID: number; }) => trip.Trip_ID === value);
     console.log("NAVIGATE: ", trip)
     const tripData = trip;
     navigation.navigate('Map', { trip: tripData });
@@ -56,7 +56,7 @@ const DropDown = () => {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <TouchableOpacity onPress={openModal} style={styles.button}>
         <Text style={styles.buttonText}> {tripName ? tripName : 'Select a Trip'} </Text>
       </TouchableOpacity>
@@ -67,7 +67,7 @@ const DropDown = () => {
         onBackButtonPress={closeModal} 
       >
         <View style={styles.modalContent}>
-          {trips.map((trip) => (
+          {trips.map((trip: { Trip_ID: number; }) => (
             <TouchableOpacity
               key={trip.Trip_ID}
               onPress={() => handleSelect(trip.Trip_ID)}
@@ -82,10 +82,6 @@ const DropDown = () => {
           </TouchableOpacity>
         </View>
       </Modal>
-
-      {selectedValue && (
-        <Text style={styles.selectedValueText}>You selected: {selectedValue}</Text>
-      )}
     </View>
   );
 };
@@ -93,20 +89,19 @@ const DropDown = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
+    marginTop: 0,
+    padding: 20,
   },
   button: {
     backgroundColor: 'blue',
-    padding: 10,
     borderRadius: 5,
-    alignSelf: "flex-start",
+    marginTop: 0,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
   buttonText: {
     color: 'white',
     fontSize: 10,
-    height: 100,
   },
   modalContent: {
     backgroundColor: 'white',

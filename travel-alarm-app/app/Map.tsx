@@ -29,8 +29,11 @@ const MapComponent = () => {
       const end = trip.End;
       const ETA = trip.ETA;
 
-      const trimmedStart = start.split(',').map((item) => parseFloat(item.trim()));
-      const trimmedEnd = end.split(',').map((item) => parseFloat(item.trim()));
+      console.log("ETA: ", ETA);
+      setETA(ETA);
+
+      const trimmedStart = start.split(',').map((item: string) => parseFloat(item.trim()));
+      const trimmedEnd = end.split(',').map((item: string) => parseFloat(item.trim()));
 
       setOrigin({latitude: trimmedStart[0], longitude: trimmedStart[1]});
       setDestination({latitude: trimmedEnd[0], longitude: trimmedEnd[1]})
@@ -91,10 +94,6 @@ const MapComponent = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.mapHeader}>
-        <DropDown />
-        {estimatedTimeArrrival && <Text style={styles.ETA}>{estimatedTimeArrrival}</Text> }
-      </View>
       {userLocation &&
       <MapView
         ref={mapRef}
@@ -117,6 +116,11 @@ const MapComponent = () => {
           <Polyline coordinates={routeCoordinates} strokeWidth={4} strokeColor="blue" />
         )}
       </MapView> }
+
+      <View style={styles.mapHeader}>
+        <DropDown />
+        {estimatedTimeArrrival && <Text style={styles.ETA}>{estimatedTimeArrrival}</Text> }
+      </View>
     </View>
   );
 };
@@ -155,12 +159,16 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   ETA: {
+    padding: 20,
+    marginTop: 0, 
     color: "white",
     fontSize: 18,
   },
   mapHeader: {
     backgroundColor: "black",
     width: "100%",
-    height: 100,
+    height: 200,
+    flexDirection: 'row', 
+    gap: 10, 
   },
 });
