@@ -4,6 +4,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const tripRoutes = require('./tripRoutes'); 
+const distanceRoutes = require('./distanceRoutes');
 
 const app = express();
 app.use(cors());
@@ -39,6 +40,7 @@ const db = mysql.createPool({
 
 console.log('Connected to database');
 console.log(tripRoutes);
+console.log(distanceRoutes)
 
 
 // // ✅ API Route to Fetch Words
@@ -64,6 +66,7 @@ console.log(tripRoutes);
 // });
 
 app.use('/api', tripRoutes);
+app.use('/api', distanceRoutes);
 
 // ✅ API Route to Fetch Words
 app.get('/api/words', async (req, res) => {

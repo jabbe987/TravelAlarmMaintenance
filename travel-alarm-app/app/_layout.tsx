@@ -6,7 +6,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect} from 'react';
 import 'react-native-reanimated';
 
+
 import { useColorScheme } from '@/hooks/useColorScheme';
+//import DistanceView from './DistanceView';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -34,6 +36,7 @@ export default function RootLayout() {
         <Stack.Screen name="UserView" options={{ title: "User View" }} />
         <Stack.Screen name="Map" options={{ title: "Map View"}}/>
         <Stack.Screen name="WebMap" options={{title: "Web Map View" }}/>
+        <Stack.Screen name="DistanceView" options={{ title: "Distance API view"}}/>
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
