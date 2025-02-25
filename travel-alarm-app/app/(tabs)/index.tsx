@@ -1,7 +1,6 @@
 import { Image, StyleSheet, Platform } from 'react-native';
 import { useRouter } from "expo-router";
-import { View, Text, Button} from "react-native";
-
+import { View, Text, Button } from "react-native";
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -19,10 +18,13 @@ export default function HomeScreen() {
       <Button title="Go to User View" onPress={() => router.push("/UserView")} />
 
       {/* Button to Map View */}
-      { Platform.OS !== "web" && <Button title="Go to Map View" onPress={() => router.push("/Map")} />}
+      {Platform.OS !== "web" && <Button title="Go to Map View" onPress={() => router.push("/Map")} />}
 
-      {/* Button to Map View */}
-      { Platform.OS === "web" && <Button title="Go to Map View Leaflet" onPress={() => router.push("/WebMap")} />}
+      {/* Button to Web Map View */}
+      {Platform.OS === "web" && <Button title="Go to Map View Leaflet" onPress={() => router.push("/WebMap")} />}
+
+      {/* 🚀 New Button to Distance View */}
+      <Button title="Go to Distance View" onPress={() => router.push("/DistanceView")} />
     </View>
   );
 }
