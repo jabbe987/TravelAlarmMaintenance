@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, Text} from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity} from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import polyline from "@mapbox/polyline";
@@ -22,6 +22,10 @@ const MapComponent = () => {
 
   const mapRef = useRef<MapView | null>(null);
   const route = useRoute<MapScreenRouteProp>();
+
+  const startTrip = (() => {
+    console.log("Starting Trip");
+  });
 
   useEffect (() => {
     if (trip) {
@@ -118,7 +122,9 @@ const MapComponent = () => {
       </MapView> }
 
       <View style={styles.mapBottomBar}>
-        <DropDown />
+        <TouchableOpacity onPress={startTrip} style={styles.buttonStartTrip}>
+              <Text style={styles.buttonStartTripText}> Start Trip </Text>
+            </TouchableOpacity>
         {estimatedTimeArrrival && <Text style={styles.ETA}>{"ETA: " + estimatedTimeArrrival}</Text> }
       </View>
     </View>
@@ -158,17 +164,31 @@ const styles = StyleSheet.create({
     color: 'black',
     padding: 10,
   },
-  ETA: {
-    padding: 20,
-    marginTop: 0, 
-    color: "white",
-    fontSize: 18,
-  },
   mapBottomBar: {
-    backgroundColor: "black",
-    width: "100%",
-    height: 200,
-    flexDirection: 'row', 
-    gap: 10, 
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row', // Align elements horizontally
+    justifyContent: 'space-between', // Space out the button and ETA
+    alignItems: 'center', // Vertically center content
+    padding: 15,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background
+  },
+  buttonStartTrip: {
+    backgroundColor: 'blue',
+    borderRadius: 5,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  buttonStartTripText: {
+    color: 'white',
+    fontSize: 14, // Adjust font size for better readability
+  },
+  ETA: {
+    color: 'white',
+    fontSize: 14, // Adjust font size for better readability
+    paddingLeft: 10,
   },
 });

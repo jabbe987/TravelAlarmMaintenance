@@ -6,23 +6,34 @@ import Modal from 'react-native-modal';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Map'>;
+type MapScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Map'>;
+type AddTripModalNavigationProp = StackNavigationProp<RootStackParamList, 'AddTrip'>;
 
 const DropDown = () => {
   const [isModalVisible, setIsModalVisible] = useState(false); 
   const [selectedValue, setSelectedValue] = useState<number | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]); 
   const [tripName, setTripName] = useState<string | null>(null);
-  const navigation = useNavigation<HomeScreenNavigationProp>();
+  const navigationToMap = useNavigation<MapScreenNavigationProp>();
+  const navigationToAddTrip = useNavigation<AddTripModalNavigationProp>();
 
   const openModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
+
+  const addTrip = () => {
+    setIsModalVisible(false);
+    navigationToAddTrip.navigate('AddTrip', {userId: 1});
+  }
 
   const navigateToDetails = (value: number) => {
     const trip = trips.find((trip: { Trip_ID: number; }) => trip.Trip_ID === value);
     console.log("NAVIGATE: ", trip)
     const tripData = trip;
-    navigation.navigate('Map', { trip: tripData });
+    if (trip) {
+      navigationToMap.navigate('Map', { trip: tripData });
+    } else {
+      throw console.error("Trip could not be loaded onto map");
+    }
   };
 
   useEffect(() => {
@@ -77,9 +88,15 @@ const DropDown = () => {
             </TouchableOpacity>
           ))}
 
-          <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-            <Text style={styles.buttonText}>Close</Text>
-          </TouchableOpacity>
+          <View style={styles.bottomView}>
+            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+              <Text style={styles.buttonTextBottom}>Close</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={addTrip} style={styles.closeButton}>
+              <Text style={styles.buttonTextBottom}>Add Trip</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </View>
@@ -88,48 +105,52 @@ const DropDown = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    marginTop: 0,
-    padding: 20,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingRight: 10,
   },
   button: {
     backgroundColor: 'blue',
     borderRadius: 5,
-    marginTop: 0,
-    paddingVertical: 10,
     paddingHorizontal: 10,
+    paddingVertical: 5, 
+    alignItems: 'center',
   },
   buttonText: {
     color: 'white',
-    fontSize: 10,
+    fontSize: 8, 
   },
   modalContent: {
     backgroundColor: 'white',
-    padding: 20,
+    padding: 15, 
     borderRadius: 10,
-    width: '80%',
+    width: '70%', 
   },
   option: {
-    padding: 15,
+    padding: 10, 
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
   optionText: {
-    fontSize: 18,
+    fontSize: 12,
+  },
+  bottomView: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingRight: 10,
+    gap: 20,
   },
   closeButton: {
     backgroundColor: 'red',
-    width: 40,
-    height: 30,
-    alignItems: 'center',
-    padding: 2,
     borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5, 
+    alignItems: 'center',
     marginTop: 5,
   },
-  selectedValueText: {
-    marginTop: 20,
-    fontSize: 18,
-    color: 'green',
+  buttonTextBottom: {
+    color: 'white',
+    fontSize: 16, 
   },
 });
 
