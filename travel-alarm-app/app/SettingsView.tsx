@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Modal, TextInput, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -10,10 +10,86 @@ const SettingsView = () => {
   const [time, setTime] = useState<string>('');
   const router = useRouter();
 
+  // Fetch current settings when the component mounts
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('selectedUser');
+        if (!userId) {
+          console.warn('No user found');
+          return;
+        }
+
+        const response = await fetch(`http://155.4.245.117:8000/api/settings/${userId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch user settings');
+        }
+
+        const data = await response.json();
+        console.log('Fetched user settings:', data);
+
+        // Update state with fetched settings
+        setAlarmType(data.AlarmType === 0 ? 'distance' : 'time'); // BIT(1) stored as 0 or 1
+        if (data.AlarmType === 0) {
+          setDistance(data.AlarmValue.toString());
+        } else {
+          setTime(data.AlarmValue.toString());
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
   // Function to reset user and go back to selection
   const handleChangeUser = async () => {
     await AsyncStorage.removeItem('selectedUser');
     router.replace('/'); // Redirect to the main selection screen
+  };
+
+  // Function to save user settings to backend
+  const handleSaveSettings = async () => {
+    try {
+        const userId = await AsyncStorage.getItem('selectedUser');
+
+        if (!userId) {
+            alert('User not found!');
+            return;
+        }
+
+        const settings = {
+            userId,
+            alarmType: alarmType === 'distance' ? 0 : 1, // Convert 'distance' -> 0, 'time' -> 1
+            alarmValue: alarmType === 'distance' ? distance : time,
+        };
+
+        console.log('Saving settings:', settings);
+
+        const response = await fetch('http://155.4.245.117:8000/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settings),
+        });
+
+        const data = await response.json();
+        console.log('Response:', data);
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to update settings');
+        }
+
+        alert('Settings updated successfully');
+
+        // ✅ Close the modal and navigate back (if needed)
+        setModalVisible(false);
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error updating settings');
+        setModalVisible(false);
+    }
   };
 
   return (
@@ -64,8 +140,8 @@ const SettingsView = () => {
               />
             )}
 
-            {/* Close Modal */}
-            <Button title="Save & Close" onPress={() => setModalVisible(false)} />
+            {/* Save Button */}
+            <Button title="Save & Close" onPress={handleSaveSettings} />
           </View>
         </View>
       </Modal>
