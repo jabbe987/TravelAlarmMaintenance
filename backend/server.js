@@ -7,6 +7,7 @@ const tripRoutes = require('./tripRoutes');
 const distanceRoutes = require('./distanceRoutes');
 const activeTrip = require('./activeTrip');
 const updateEta = require('./updateEta');
+const userSettings = require('./userSettings'); 
 
 const app = express();
 app.use(cors());
@@ -71,6 +72,7 @@ app.use('/api', tripRoutes);
 app.use('/api', distanceRoutes);
 app.use('/api', activeTrip);
 app.use('/api', updateEta);
+app.use('/api', userSettings);
 
 // ✅ API Route to Fetch Words
 app.get('/api/words', async (req, res) => {
