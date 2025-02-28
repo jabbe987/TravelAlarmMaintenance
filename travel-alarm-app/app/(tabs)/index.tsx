@@ -10,10 +10,8 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const checkUserSelection = async () => {
-      const storedUser = await AsyncStorage.getItem("selectedUser");
-      if (storedUser) {
-        setSelectedUser(storedUser);
-      }
+      await AsyncStorage.removeItem("selectedUser");
+      setSelectedUser(null);
       setLoading(false);
     };
     checkUserSelection();
