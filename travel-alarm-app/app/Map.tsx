@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet} from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity} from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import polyline from "@mapbox/polyline";
@@ -17,17 +17,27 @@ const MapComponent = () => {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [origin, setOrigin] = useState<{ latitude: number; longitude: number } | null>(null); 
   const [destination, setDestination] = useState<{ latitude: number; longitude: number } | null>(null); 
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [estimatedTimeArrrival, setETA] = useState<string | null>(null)
+
   const mapRef = useRef<MapView | null>(null);
   const route = useRoute<MapScreenRouteProp>();
-  const [trip, setTrip] = useState<Trip | null>(null);
+
+  const startTrip = (() => {
+    console.log("Starting Trip");
+  });
 
   useEffect (() => {
     if (trip) {
       const start = trip.Start;
       const end = trip.End;
+      const ETA = trip.ETA;
 
-      const trimmedStart = start.split(',').map((item) => parseFloat(item.trim()));
-      const trimmedEnd = end.split(',').map((item) => parseFloat(item.trim()));
+      console.log("ETA: ", ETA);
+      setETA(ETA);
+
+      const trimmedStart = start.split(',').map((item: string) => parseFloat(item.trim()));
+      const trimmedEnd = end.split(',').map((item: string) => parseFloat(item.trim()));
 
       setOrigin({latitude: trimmedStart[0], longitude: trimmedStart[1]});
       setDestination({latitude: trimmedEnd[0], longitude: trimmedEnd[1]})
@@ -88,7 +98,6 @@ const MapComponent = () => {
 
   return (
     <View style={styles.container}>
-      <DropDown />
       {userLocation &&
       <MapView
         ref={mapRef}
@@ -111,6 +120,13 @@ const MapComponent = () => {
           <Polyline coordinates={routeCoordinates} strokeWidth={4} strokeColor="blue" />
         )}
       </MapView> }
+
+      <View style={styles.mapBottomBar}>
+        <TouchableOpacity onPress={startTrip} style={styles.buttonStartTrip}>
+              <Text style={styles.buttonStartTripText}> Start Trip </Text>
+            </TouchableOpacity>
+        {estimatedTimeArrrival && <Text style={styles.ETA}>{"ETA: " + estimatedTimeArrrival}</Text> }
+      </View>
     </View>
   );
 };
@@ -147,5 +163,32 @@ const styles = StyleSheet.create({
     fontSize: 30, 
     color: 'black',
     padding: 10,
+  },
+  mapBottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row', // Align elements horizontally
+    justifyContent: 'space-between', // Space out the button and ETA
+    alignItems: 'center', // Vertically center content
+    padding: 15,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background
+  },
+  buttonStartTrip: {
+    backgroundColor: 'blue',
+    borderRadius: 5,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  buttonStartTripText: {
+    color: 'white',
+    fontSize: 14, // Adjust font size for better readability
+  },
+  ETA: {
+    color: 'white',
+    fontSize: 14, // Adjust font size for better readability
+    paddingLeft: 10,
   },
 });
