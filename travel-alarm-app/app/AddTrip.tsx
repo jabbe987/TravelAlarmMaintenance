@@ -50,8 +50,17 @@ const AddTrip = () => {
         setFormIsVisible(true);
     }, [route.params?.userId]);
 
-    const handleSubmit = () => {
-        console.log("SUBMITTING");
+    const handleSubmit = async () => {
+        console.log("SUBMITTING", alarm, endPoint, startPoint);
+
+        // TODO:  CREATE USER CONTEXT TO USE ID ALL OVER APPLICATION, USE DISTANCE ROUTER TO CALCULATE ETA
+        const response = await axios.post('http://155.4.245.117:8000/api/trips', { Alarm_ID: 0, User_ID: 1, Start: startPoint, End: endPoint, ETA:"00:40:00"})
+        .then(response => {
+          console.log("Success", response)
+        })
+        .catch(error => {
+          console.log("Error posting trip - ", error)
+        })
     }
 
     return (
