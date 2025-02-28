@@ -1,49 +1,55 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, Text, TouchableOpacity} from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import polyline from "@mapbox/polyline";
-import DropDown from "./DropDown";
-import { Trip, RootStackParamList  } from './types';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { Trip, RootStackParamList } from "./types";
+import { RouteProp, useRoute } from "@react-navigation/native";
+import ETAUpdater from "./ETAUpdater"; // ✅ Corrected import path
 
 const OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving";
 
-type MapScreenRouteProp = RouteProp<RootStackParamList, 'Map'>;
-
+type MapScreenRouteProp = RouteProp<RootStackParamList, "Map">;
 type RouteCoordinate = { latitude: number; longitude: number };
+
 const MapComponent = () => {
   const [routeCoordinates, setRouteCoordinates] = useState<RouteCoordinate[]>([]);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [origin, setOrigin] = useState<{ latitude: number; longitude: number } | null>(null); 
-  const [destination, setDestination] = useState<{ latitude: number; longitude: number } | null>(null); 
+  const [origin, setOrigin] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [destination, setDestination] = useState<{ latitude: number; longitude: number } | null>(null);
   const [trip, setTrip] = useState<Trip | null>(null);
-  const [estimatedTimeArrrival, setETA] = useState<string | null>(null)
+  const [estimatedTimeArrival, setETA] = useState<string | null>(null);
+  const [isActiveTrip, setIsActiveTrip] = useState(false);
 
   const mapRef = useRef<MapView | null>(null);
   const route = useRoute<MapScreenRouteProp>();
 
-  const startTrip = (() => {
+  const startTrip = async () => {
     console.log("Starting Trip");
-  });
+    try {
+      const response = await fetch("/active-trip-status");
+      const data = await response.json();
+      setIsActiveTrip(data.isActive);
+    } catch (error) {
+      console.error("Error fetching active trip status:", error);
+    }
+  };
 
-  useEffect (() => {
+  useEffect(() => {
     if (trip) {
       const start = trip.Start;
       const end = trip.End;
       const ETA = trip.ETA;
-
       console.log("ETA: ", ETA);
       setETA(ETA);
 
-      const trimmedStart = start.split(',').map((item: string) => parseFloat(item.trim()));
-      const trimmedEnd = end.split(',').map((item: string) => parseFloat(item.trim()));
+      const trimmedStart = start.split(",").map((item: string) => parseFloat(item.trim()));
+      const trimmedEnd = end.split(",").map((item: string) => parseFloat(item.trim()));
 
-      setOrigin({latitude: trimmedStart[0], longitude: trimmedStart[1]});
-      setDestination({latitude: trimmedEnd[0], longitude: trimmedEnd[1]})
+      setOrigin({ latitude: trimmedStart[0], longitude: trimmedStart[1] });
+      setDestination({ latitude: trimmedEnd[0], longitude: trimmedEnd[1] });
     }
-    
-  }, [trip])
+  }, [trip]);
 
   useEffect(() => {
     (async () => {
@@ -52,7 +58,6 @@ const MapComponent = () => {
         console.error("Permission to access location was denied");
         return;
       }
-
       let currentLocation = await Location.getCurrentPositionAsync({});
       setUserLocation(currentLocation.coords);
     })();
@@ -71,7 +76,6 @@ const MapComponent = () => {
 
   const fetchOSRMRoute = async () => {
     if (origin !== null && destination !== null) {
-
       const url = `${OSRM_API_URL}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
       try {
         const response = await fetch(url);
@@ -80,7 +84,6 @@ const MapComponent = () => {
         if (data.routes.length > 0) {
           const points: [number, number][] = polyline.decode(data.routes[0].geometry);
           const routeCoords = points.map(([lat, lng]) => ({ latitude: lat, longitude: lng }));
-
           setRouteCoordinates(routeCoords);
 
           if (mapRef.current) {
@@ -98,35 +101,39 @@ const MapComponent = () => {
 
   return (
     <View style={styles.container}>
-      {userLocation &&
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={{
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-        showsUserLocation
-      >
-        { origin && destination ? (
-          <>
-          <Marker coordinate={origin} title="Start" />
-          <Marker coordinate={destination} title="Destination" /> 
-          </> ) : null}
+      {userLocation && (
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          initialRegion={{
+            latitude: userLocation.latitude,
+            longitude: userLocation.longitude,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          }}
+          showsUserLocation
+        >
+          {origin && destination && (
+            <>
+              <Marker coordinate={origin} title="Start" />
+              <Marker coordinate={destination} title="Destination" />
+            </>
+          )}
 
-        {routeCoordinates.length > 0 && (
-          <Polyline coordinates={routeCoordinates} strokeWidth={4} strokeColor="blue" />
-        )}
-      </MapView> }
+          {routeCoordinates.length > 0 && (
+            <Polyline coordinates={routeCoordinates} strokeWidth={4} strokeColor="blue" />
+          )}
+        </MapView>
+      )}
 
       <View style={styles.mapBottomBar}>
         <TouchableOpacity onPress={startTrip} style={styles.buttonStartTrip}>
-              <Text style={styles.buttonStartTripText}> Start Trip </Text>
-            </TouchableOpacity>
-        {estimatedTimeArrrival && <Text style={styles.ETA}>{"ETA: " + estimatedTimeArrrival}</Text> }
+          <Text style={styles.buttonStartTripText}> Start Trip </Text>
+        </TouchableOpacity>
+        {estimatedTimeArrival && <Text style={styles.ETA}>{"ETA: " + estimatedTimeArrival}</Text>}
       </View>
+
+      {isActiveTrip && <ETAUpdater setETA={setETA} />}
     </View>
   );
 };
@@ -134,61 +141,26 @@ const MapComponent = () => {
 export default MapComponent;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  map: {
-    width: "100%",
-    height: "100%",
-  },
-  marker: {
-    backgroundColor: "white",
-    padding: 5,
-    borderRadius: 5,
-  },
-  markerText: {
-    fontWeight: "bold",
-  },
-  loadingText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "gray",
-  },
-  menuButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    fontSize: 30, 
-    color: 'black',
-    padding: 10,
-  },
+  container: { flex: 1, justifyContent: "center", alignItems: "center" },
+  map: { width: "100%", height: "100%" },
   mapBottomBar: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    flexDirection: 'row', // Align elements horizontally
-    justifyContent: 'space-between', // Space out the button and ETA
-    alignItems: 'center', // Vertically center content
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 15,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   buttonStartTrip: {
-    backgroundColor: 'blue',
+    backgroundColor: "blue",
     borderRadius: 5,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  buttonStartTripText: {
-    color: 'white',
-    fontSize: 14, // Adjust font size for better readability
-  },
-  ETA: {
-    color: 'white',
-    fontSize: 14, // Adjust font size for better readability
-    paddingLeft: 10,
-  },
+  buttonStartTripText: { color: "white", fontSize: 14 },
+  ETA: { color: "white", fontSize: 14, paddingLeft: 10 },
 });

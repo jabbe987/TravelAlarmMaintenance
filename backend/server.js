@@ -67,6 +67,8 @@ console.log(distanceRoutes)
 
 app.use('/api', tripRoutes);
 app.use('/api', distanceRoutes);
+app.use('/api', activeTrip);
+app.use('/', updateEta);
 
 // ✅ API Route to Fetch Words
 app.get('/api/words', async (req, res) => {
