@@ -1,6 +1,6 @@
 export type RootStackParamList = {
-    Home: undefined;
-    Map: { trip: Trip };
+    AddTrip: { userId?: number};
+    Map: { trip?: Trip };
   };
 
 export type Trip = {
