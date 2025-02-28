@@ -8,6 +8,9 @@ const axios = require('axios');
 router.get('/active-trip-status', async (req, res) => {
     try {
         const [user] = await db.query("SELECT Active_trip FROM User WHERE User_ID = 1");
+        console.log("const [user]: ",user);
+        console.log("user.Active_trip: ",user.Active_trip);
+        console.log("User: ",user);
 
 
         if (user && user.Active_trip) {
