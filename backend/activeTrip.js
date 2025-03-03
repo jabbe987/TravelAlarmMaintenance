@@ -1,7 +1,17 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-require('dotenv').config();
+const mysql = require('mysql2');
+
+
+const db = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT
+});
 
 router.get('/active-trip-status', async (req, res) => {
     try {
