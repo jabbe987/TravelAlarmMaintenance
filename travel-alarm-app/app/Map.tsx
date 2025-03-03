@@ -28,16 +28,18 @@ const MapComponent = () => {
     console.log("Starting Trip");
     try {
       const response = await fetch("http://155.4.245.117:8000/api/active-trip-status");
-      console.log("response: ",response);
+      //console.log("response: ",response);
       const data = await response.json();
       console.log("data :",data);
       setIsActiveTrip(data.isActive);
+      console.log("setIsActiveTrip: ", setIsActiveTrip);
     } catch (error) {
       console.error("Error fetching active trip status:", error);
     }
   };
 
   useEffect(() => {
+    console.log("useEffect triggered - trip:", trip);
     if (trip) {
       const start = trip.Start;
       const end = trip.End;
