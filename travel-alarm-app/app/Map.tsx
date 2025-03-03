@@ -28,7 +28,9 @@ const MapComponent = () => {
     console.log("Starting Trip");
     try {
       const response = await fetch("/active-trip-status");
+      console.log("response: ",response);
       const data = await response.json();
+      console.log("data :",data);
       setIsActiveTrip(data.isActive);
     } catch (error) {
       console.error("Error fetching active trip status:", error);
