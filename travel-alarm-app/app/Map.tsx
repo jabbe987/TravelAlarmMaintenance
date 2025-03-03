@@ -27,7 +27,7 @@ const MapComponent = () => {
   const startTrip = async () => {
     console.log("Starting Trip");
     try {
-      const response = await fetch("/api/active-trip-status");
+      const response = await fetch("http://155.4.245.117:8000/api/active-trip-status");
       console.log("response: ",response);
       const data = await response.json();
       console.log("data :",data);
