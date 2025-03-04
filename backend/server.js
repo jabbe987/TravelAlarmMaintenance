@@ -98,8 +98,8 @@ app.get('/users', async (req, res) => {
 });
 
 app.get('/api/config', (req, res) => {
-    res.json({ GOOGLE_API_KEY: process.env.GOOGLE_API_KEY });
-    console.log("🔍 GOOGLE_API_KEY from env:", process.env.GOOGLE_API_KEY);
+    res.json({ GOOGLE_API_KEY: process.env.GOOGLE_MAPS_API_KEY });
+    console.log("🔍 GOOGLE_API_KEY from env:", process.env.GOOGLE_MAPS_API_KEY);
 });
 
 
