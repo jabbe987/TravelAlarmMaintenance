@@ -4,7 +4,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const tripRoutes = require('./tripRoutes'); 
-const distanceRoutes = require('./distanceRoutes');
+//const distanceRoutes = require('./distanceRoutes');
 const locations = require('./location')
 const activeTrip = require('./activeTrip');
 const updateEta = require('./updateEta');
@@ -70,11 +70,11 @@ console.log(tripRoutes);
 // });
 
 app.use('/api', tripRoutes);
-app.use('/api', distanceRoutes);
-app.use('/api', activeTrip);
-app.use('/api', updateEta);
-app.use('/api', userSettings);
-app.use('/api', locations);
+//app.use('/api', distanceRoutes);
+// app.use('/api', activeTrip);
+// app.use('/api', updateEta);
+// app.use('/api', userSettings);
+// app.use('/api', locations);
 
 // ✅ API Route to Fetch Words
 app.get('/api/words', async (req, res) => {
@@ -104,6 +104,6 @@ app.get('/api/config', (req, res) => {
 
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+app.listen(3001, () => {
     console.log(`Server is running on port ${PORT}`);
 });

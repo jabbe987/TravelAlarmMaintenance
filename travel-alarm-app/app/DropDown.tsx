@@ -12,6 +12,7 @@ type AddTripModalNavigationProp = StackNavigationProp<RootStackParamList, 'AddTr
 const DropDown = () => {
   const [isModalVisible, setIsModalVisible] = useState(false); 
   const [selectedValue, setSelectedValue] = useState<number | null>(null);
+  const [locations, setLocations] = useState<Array<{ label: string; value: string}>>([]);
   const [trips, setTrips] = useState<Trip[]>([]); 
   const [tripName, setTripName] = useState<string | null>(null);
   const navigationToMap = useNavigation<MapScreenNavigationProp>();
@@ -37,6 +38,27 @@ const DropDown = () => {
   };
 
   useEffect(() => {
+    axios.get('http://155.4.245.117:8000/api/locations')
+    .then(response => {
+      const formattedLocations = response.data.map((loc: { Name: string; Coordinates: string; }) => ({
+        label: loc.Name, 
+        value: loc.Coordinates,   
+    }));
+    setLocations(formattedLocations);
+    })
+    .catch(error => {
+      console.error('Error fetching words:', error);
+      if (error.response) {
+        console.error('Response error:', error.response.data);
+      } else if (error.request) {
+        console.error('Request error:', error.request);
+      } else {
+        console.error('General error:', error.message);
+      }
+  });
+  }, [])
+
+  useEffect(() => {
     axios.get('http://155.4.245.117:8000/api/trips')
           .then(response => {
             setTrips(response.data);
@@ -52,19 +74,33 @@ const DropDown = () => {
             }
         });
     
-  }, []);
+  });
 
-  const handleSelect = (value: number) => {
-    console.log("SELECTING VALUE: ", value)
-    if (value === 1) {
-        setTripName('Selected Uppsala-Stockholm');
-    } else {
-        setTripName('Selected Uppsala-Ångström');
-    }
-    setSelectedValue(value); 
+  const handleSelect = (trip: Trip) => {
+
+    let tripString = checkWhichTrip(trip)
+
+    setTripName(tripString)
+
+    setSelectedValue(trip.Trip_ID); 
     closeModal(); 
-    navigateToDetails(value);
+    navigateToDetails(trip.Trip_ID);
   };
+
+  const checkWhichTrip = (trip: Trip) => {
+    let start = ""
+    let end = ""
+
+    locations.map((loc) => {
+      if (loc.value == trip.Start) {
+        start = loc.label
+      } else if (loc.value == trip.End) {
+        end = loc.label
+      }
+    });
+
+    return start + " - " + end
+  }
 
   return (
     <View style={styles.container}>
@@ -78,13 +114,13 @@ const DropDown = () => {
         onBackButtonPress={closeModal} 
       >
         <View style={styles.modalContent}>
-          {trips.map((trip: { Trip_ID: number; }) => (
+          {trips.map((trip: Trip) => (
             <TouchableOpacity
               key={trip.Trip_ID}
-              onPress={() => handleSelect(trip.Trip_ID)}
+              onPress={() => handleSelect(trip)}
               style={styles.option}
             >
-              <Text style={styles.optionText}>{trip.Trip_ID === 1 ? "Uppsala-Stockholm" : "Uppsala-Ångström"}</Text>
+              <Text style={styles.optionText}>{checkWhichTrip(trip)}</Text>
             </TouchableOpacity>
           ))}
 
