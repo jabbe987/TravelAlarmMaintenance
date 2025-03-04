@@ -5,6 +5,10 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const tripRoutes = require('./tripRoutes'); 
 //const distanceRoutes = require('./distanceRoutes');
+const locations = require('./location')
+const activeTrip = require('./activeTrip');
+const updateEta = require('./updateEta');
+const userSettings = require('./userSettings'); 
 
 const app = express();
 app.use(cors());
@@ -92,6 +96,12 @@ app.get('/users', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+app.get('/api/config', (req, res) => {
+    res.json({ GOOGLE_API_KEY: process.env.GOOGLE_MAPS_API_KEY });
+    console.log("🔍 GOOGLE_API_KEY from env:", process.env.GOOGLE_MAPS_API_KEY);
+});
+
 
 const PORT = process.env.PORT || 8000;
 app.listen(3001, () => {
