@@ -59,7 +59,7 @@ const DropDown = () => {
   }, [])
 
   useEffect(() => {
-    axios.get('http://192.168.68.57:3001/api/trips') //axios.get('http://155.4.245.117:8000/api/trips')
+    axios.get('http://155.4.245.117:8000/api/trips')
           .then(response => {
             setTrips(response.data);
           })
@@ -90,7 +90,7 @@ const DropDown = () => {
   const checkWhichTrip = (trip: Trip) => {
     let start = ""
     let end = ""
-    
+
     locations.map((loc) => {
       if (loc.value == trip.Start) {
         start = loc.label

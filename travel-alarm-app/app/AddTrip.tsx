@@ -29,7 +29,7 @@ const AddTrip = () => {
     useEffect(() => {
        const postTrip = async () => {
         // TODO:  CREATE USER CONTEXT TO USE ID ALL OVER APPLICATION, USE DISTANCE ROUTER TO CALCULATE ETA
-        const response = await axios.post('http://192.168.68.57:3001/api/addtrip', 
+        const response = await axios.post('http://155.4.245.117:8000/api/addtrip', 
           { Alarm_ID: 0, User_ID: 1, Start: startPoint, End: endPoint, ETA: duration})
         .then(response => {
           console.log("Success", response)
