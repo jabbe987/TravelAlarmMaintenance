@@ -417,6 +417,7 @@ const MapComponent = () => {
       console.log("📍 Active Trip Status:", data);
 
       setIsActiveTrip(data.isActive);
+      console.log()
     } catch (error) {
       console.error("❌ Error fetching active trip status:", error);
     }
@@ -424,37 +425,26 @@ const MapComponent = () => {
 
   // ✅ Fetch ETA using Google Distance Matrix API
   const fetchGoogleETA = async () => {
-  if (!origin) console.error("❌ Origin is missing");
-  if (!destination) console.error("❌ Destination is missing");
-  if (!googleApiKey) console.error("❌ Google API key is missing");
-
-    if (origin && destination && googleApiKey) {
-      const url = `${GOOGLE_DISTANCE_MATRIX_URL}?origins=${origin.latitude},${origin.longitude}&destinations=${destination.latitude},${destination.longitude}&key=${googleApiKey}`;
-      console.log("📡 Making API request to Google ETA:");
-
-      console.log("🔹 URL:", url);
-      console.log("🔹 Origin:", origin);
-      console.log("🔹 Destination:", destination);
-
-      try {
-        console.log("⏳ Fetching Google ETA...");
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.status !== "OK") {
-          console.error("❌ Google Maps API error:", data.error_message || data.status);
-          return;
-        }
-
-        const elements = data.rows[0].elements[0];
-        const etaText = elements.duration.text;
-        console.log("🕒 Updated ETA:", etaText);
-        setETA(etaText);
-      } catch (error) {
-        console.error("❌ Error fetching ETA:", error);
+    if (!origin) return console.error("❌ Origin is missing");
+    if (!destination) return console.error("❌ Destination is missing");
+  
+    try {
+      console.log("📡 Requesting ETA from backend...");
+      const response = await fetch(`http://155.4.245.117:8000/api/eta?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}`);
+      const data = await response.json();
+  
+      if (data.error) {
+        console.error("❌ Error fetching ETA:", data.error);
+        return;
       }
+  
+      console.log("🕒 Updated ETA:", data.eta);
+      setETA(data.eta);
+    } catch (error) {
+      console.error("❌ Error:", error);
     }
   };
+  
 
   // ✅ Fetch ETA when the trip changes
   useEffect(() => {

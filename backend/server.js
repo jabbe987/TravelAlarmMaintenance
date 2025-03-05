@@ -9,6 +9,7 @@ const locations = require('./location')
 const activeTrip = require('./activeTrip');
 const updateEta = require('./updateEta');
 const userSettings = require('./userSettings'); 
+const fetchGoogleEta = require('./fetchGoogleEta')
 
 const app = express();
 app.use(cors());
@@ -75,6 +76,7 @@ app.use('/api', activeTrip);
 app.use('/api', updateEta);
 app.use('/api', userSettings);
 app.use('/api', locations);
+app.use('/api', fetchGoogleEta)
 
 // ✅ API Route to Fetch Words
 app.get('/api/words', async (req, res) => {
