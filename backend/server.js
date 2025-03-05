@@ -74,7 +74,7 @@ app.use('/api', tripRoutes);
 // app.use('/api', activeTrip);
 // app.use('/api', updateEta);
 // app.use('/api', userSettings);
-// app.use('/api', locations);
+app.use('/api', locations);
 
 // ✅ API Route to Fetch Words
 app.get('/api/words', async (req, res) => {
