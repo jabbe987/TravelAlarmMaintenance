@@ -423,7 +423,48 @@ const MapComponent = () => {
     }
   };
 
-  // ✅ Fetch ETA using Google Distance Matrix API
+    // ✅ When trip changes, update origin and destination
+  useEffect(() => {
+    if (trip) {
+      console.log("📍 Trip updated:", trip);
+      const { Start, End } = trip;
+      const trimmedStart = Start.split(",").map((item: string) => parseFloat(item.trim()));
+      const trimmedEnd = End.split(",").map((item: string) => parseFloat(item.trim()));
+
+      setOrigin({ latitude: trimmedStart[0], longitude: trimmedStart[1] });
+      setDestination({ latitude: trimmedEnd[0], longitude: trimmedEnd[1] });
+    }
+  }, [trip]);
+
+  // ✅ Fetch ETA only when origin & destination are updated (not before)
+  useEffect(() => {
+    if (origin && destination && googleApiKey) {
+      fetchGoogleETA();
+    }
+  }, [origin, destination, googleApiKey]); // Now fetchGoogleETA runs with the latest trip details
+
+
+
+
+  //   // ✅ Fetch ETA when the trip changes
+  //   useEffect(() => {
+  //     if (trip) {
+  //       console.log("📍 Trip updated:", trip);
+  //       const { Start, End } = trip;
+  //       const trimmedStart = Start.split(",").map((item: string) => parseFloat(item.trim()));
+  //       const trimmedEnd = End.split(",").map((item: string) => parseFloat(item.trim()));
+  
+  //       setOrigin({ latitude: trimmedStart[0], longitude: trimmedStart[1] });
+  //       setDestination({ latitude: trimmedEnd[0], longitude: trimmedEnd[1] });
+  
+  //       if (googleApiKey) {
+  //         fetchGoogleETA(); // 🔹 Fetch ETA when trip updates
+  //       }
+  //     }
+  //   }, [trip, googleApiKey]);
+
+
+  // // ✅ Fetch ETA using Google Distance Matrix API
   const fetchGoogleETA = async () => {
     if (!origin) return console.error("❌ Origin is missing");
     if (!destination) return console.error("❌ Destination is missing");
@@ -446,22 +487,7 @@ const MapComponent = () => {
   };
   
 
-  // ✅ Fetch ETA when the trip changes
-  useEffect(() => {
-    if (trip) {
-      console.log("📍 Trip updated:", trip);
-      const { Start, End } = trip;
-      const trimmedStart = Start.split(",").map((item: string) => parseFloat(item.trim()));
-      const trimmedEnd = End.split(",").map((item: string) => parseFloat(item.trim()));
 
-      setOrigin({ latitude: trimmedStart[0], longitude: trimmedStart[1] });
-      setDestination({ latitude: trimmedEnd[0], longitude: trimmedEnd[1] });
-
-      if (googleApiKey) {
-        fetchGoogleETA(); // 🔹 Fetch ETA when trip updates
-      }
-    }
-  }, [trip, googleApiKey]);
 
   useEffect(() => {
     (async () => {
