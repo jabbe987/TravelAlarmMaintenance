@@ -4,11 +4,12 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const tripRoutes = require('./tripRoutes'); 
-const distanceRoutes = require('./distanceRoutes');
+//const distanceRoutes = require('./distanceRoutes');
 const locations = require('./location')
 const activeTrip = require('./activeTrip');
 const updateEta = require('./updateEta');
 const userSettings = require('./userSettings'); 
+const fetchGoogleEta = require('./fetchGoogleEta')
 
 const app = express();
 app.use(cors());
@@ -70,11 +71,12 @@ console.log(tripRoutes);
 // });
 
 app.use('/api', tripRoutes);
-app.use('/api', distanceRoutes);
+//app.use('/api', distanceRoutes);
 app.use('/api', activeTrip);
 app.use('/api', updateEta);
 app.use('/api', userSettings);
 app.use('/api', locations);
+app.use('/api', fetchGoogleEta)
 
 // ✅ API Route to Fetch Words
 app.get('/api/words', async (req, res) => {
@@ -96,6 +98,12 @@ app.get('/users', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+app.get('/api/config', (req, res) => {
+    res.json({ GOOGLE_API_KEY: process.env.GOOGLE_MAPS_API_KEY });
+    console.log("🔍 GOOGLE_API_KEY from env:", process.env.GOOGLE_MAPS_API_KEY);
+});
+
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {

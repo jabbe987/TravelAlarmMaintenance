@@ -9,7 +9,8 @@ type AddTripScreenRouteProp = RouteProp<RootStackParamList, 'AddTrip'>;
 
 const AddTrip = () => {
     const [formIsVisible, setFormIsVisible] = useState(false);
-    const [locations, setLocations] = useState<Array<Object>>([]);
+    const [locations, setLocations] = useState<Array<{ label: string; value: string}>>([]);
+    const [duration, setDuration] = useState<string | null>(null);
     const [startPoint, setStartPoint] = useState("");
     const [endPoint, setEndPoint] = useState("");
     const [alarm, setAlarm] = useState("");
@@ -24,16 +25,31 @@ const AddTrip = () => {
 
     const route = useRoute<AddTripScreenRouteProp>();
 
-    useEffect (() => {
-        console.log("Pressed Button, now in addTrip");
+    // ENSURE THAT DURATION HAS BEEN SET BEFORE ADDING TRIP 
+    useEffect(() => {
+       const postTrip = async () => {
+        // TODO:  CREATE USER CONTEXT TO USE ID ALL OVER APPLICATION, USE DISTANCE ROUTER TO CALCULATE ETA
+        const response = await axios.post('http://155.4.245.117:8000/api/addtrip', 
+          { Alarm_ID: 0, User_ID: 1, Start: startPoint, End: endPoint, ETA: duration})
+        .then(response => {
+          console.log("Success", response)
+        })
+        .catch(error => {
+          console.log("Error posting trip - ", error)
+        })
+        console.log(response)
+       }
 
-        axios.get('http://192.168.1.106:8000/api/locations')
+       postTrip();
+    }, [duration]);
+
+    useEffect (() => {
+        axios.get('http://155.4.245.117:8000/api/locations')
         .then(response => {
           const formattedLocations = response.data.map((loc: { Name: string; Coordinates: string; }) => ({
             label: loc.Name, 
             value: loc.Coordinates,   
         }));
-        console.log("GOTTEN LOCATIONS: ", formattedLocations);
         setLocations(formattedLocations);
         })
         .catch(error => {
@@ -51,16 +67,33 @@ const AddTrip = () => {
     }, [route.params?.userId]);
 
     const handleSubmit = async () => {
-        console.log("SUBMITTING", alarm, endPoint, startPoint);
+        let startPlace = "";
+        let endPlace = "";
 
-        // TODO:  CREATE USER CONTEXT TO USE ID ALL OVER APPLICATION, USE DISTANCE ROUTER TO CALCULATE ETA
-        const response = await axios.post('http://155.4.245.117:8000/api/trips', { Alarm_ID: 0, User_ID: 1, Start: startPoint, End: endPoint, ETA:"00:40:00"})
-        .then(response => {
-          console.log("Success", response)
+        locations.map((loc) => { 
+          let place = loc.value
+
+          if (place === startPoint) {
+            startPlace = loc.label
+          } else if (place == endPoint) {
+            endPlace = loc.label
+          }
+        })
+        axios.get('http://155.4.245.117:8000/api/distance', {
+          params: {
+              origins: startPlace,
+              destinations: endPlace
+          }
+      })
+      .then(response => {
+
+        const result = response.data["duration"];
+        
+        setDuration(result)
         })
         .catch(error => {
-          console.log("Error posting trip - ", error)
-        })
+            console.error('Error fetching distance:', error);
+        });
     }
 
     return (

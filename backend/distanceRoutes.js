@@ -65,7 +65,7 @@ router.get('/distance', async (req, res) => {
 
     try {
         const response = await axios.get(url);
-
+        
         if (response.data.status !== 'OK') {
             return res.status(400).json({
                 error: 'API request failed.',

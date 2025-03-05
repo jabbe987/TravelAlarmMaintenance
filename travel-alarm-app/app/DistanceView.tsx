@@ -22,6 +22,7 @@ const DistanceView: React.FC = () => {
             }
         })
         .then(response => {
+            console.log(response.data)
             const result = response.data.rows[0].elements[0];
             if (result.status === 'OK') {
                 setDistance(result.distance.text);
