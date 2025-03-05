@@ -59,6 +59,9 @@ export default function HomeScreen() {
 
       {/* 🚀 New Button to Distance View */}
       <Button title="Settings" onPress={() => router.push("/SettingsView")} />
+        
+      {/* 🚀 New Button to Sound View */}
+      <Button title="Go to Sound View" onPress={() => router.push("/SoundView")} />
     </View>
   );
 }
