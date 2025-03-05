@@ -69,7 +69,7 @@ console.log(tripRoutes);
 //     });
 // });
 
-app.use('/api/trips', tripRoutes);
+app.use('/api', tripRoutes);
 //app.use('/api', distanceRoutes);
 app.use('/api', activeTrip);
 app.use('/api', updateEta);
