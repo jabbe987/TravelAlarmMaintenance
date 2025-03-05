@@ -390,6 +390,7 @@ const MapComponent = () => {
   const [estimatedTimeArrival, setETA] = useState<string | null>(null);
   const [isActiveTrip, setIsActiveTrip] = useState(false);
   const [googleApiKey, setGoogleApiKey] = useState<string | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const mapRef = useRef<MapView | null>(null);
   const route = useRoute<MapScreenRouteProp>();
@@ -409,28 +410,131 @@ const MapComponent = () => {
     fetchApiKey();
   }, []);
 
-  const startTrip = async () => {
-    console.log("🚀 Starting Trip");
-    try {
-      const response = await fetch("http://155.4.245.117:8000/api/active-trip-status");
-      const data = await response.json();
-      console.log("📍 Active Trip Status:", data);
+  // const startTrip = async () => {
+  //   console.log("🚀 Starting Trip");
+  //   try {
+  //     const response = await fetch("http://155.4.245.117:8000/api/active-trip-status");
+  //     const data = await response.json();
+  //     console.log("📍 Active Trip Status:", data);
 
-      setIsActiveTrip(data.isActive);
-      console.log()
-    } catch (error) {
-      console.error("❌ Error fetching active trip status:", error);
+  //     setIsActiveTrip(data.isActive);
+  //     console.log()
+  //   } catch (error) {
+  //     console.error("❌ Error fetching active trip status:", error);
+  //   }
+  // };
+  const startTrip = async () => {
+    console.log("Starting Trip");
+    setIsActiveTrip(true);
+
+    if(intervalRef.current) {
+      clearInterval(intervalRef.current);
+    } 
+
+    fetchGoogleETA();
+
+    intervalRef.current = setInterval(() => {
+      console.log(" Fetching updated ETA from current location...");
+      fetchGoogleETA();
+    }, 20000);
+  };
+
+  const stopTrip = async () => {
+    console.log("Stopping Trip");
+    setIsActiveTrip(false);
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
   };
 
-  // ✅ Fetch ETA using Google Distance Matrix API
-  const fetchGoogleETA = async () => {
-    if (!origin) return console.error("❌ Origin is missing");
-    if (!destination) return console.error("❌ Destination is missing");
+  // ✅ Fetch ETA only when trip is active
+useEffect(() => {
+  if (isActiveTrip) {
+    console.log("⏳ Trip is active, fetching initial ETA...");
+    fetchGoogleETA();
+  } else {
+    // Stop fetching ETA when trip is inactive
+    stopTrip();
+  }
+}, [isActiveTrip]);
+
+// ✅ Cleanup when component unmounts
+useEffect(() => {
+  return () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  };
+}, []);
+
+    // ✅ Fetch ETA when the trip changes
+    useEffect(() => {
+      if (trip) {
+        console.log("📍 Trip updated:", trip);
+        const { Start, End } = trip;
+        const trimmedStart = Start.split(",").map((item: string) => parseFloat(item.trim()));
+        const trimmedEnd = End.split(",").map((item: string) => parseFloat(item.trim()));
   
+        setOrigin({ latitude: trimmedStart[0], longitude: trimmedStart[1] });
+        setDestination({ latitude: trimmedEnd[0], longitude: trimmedEnd[1] });
+  
+        if (googleApiKey) {
+          fetchGoogleETA(); // 🔹 Fetch ETA when trip updates
+        }
+      }
+    }, [trip, googleApiKey]);
+
+
+  // // ✅ Fetch ETA using Google Distance Matrix API
+  // const fetchGoogleETA = async () => {
+  //   // if (!origin) return console.error("❌ Origin is missing");
+  //   // if (!destination) return console.error("❌ Destination is missing");
+  //   console.log("Getting current device location...");
+  
+  //   try {
+  //     console.log("📡 Requesting ETA from backend...");
+  //     const response = await fetch(`http://155.4.245.117:8000/api/eta?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}`);
+  //     const data = await response.json();
+  
+  //     if (data.error) {
+  //       console.error("❌ Error fetching ETA:", data.error);
+  //       return;
+  //     }
+  
+  //     console.log("🕒 Updated ETA:", data.eta);
+  //     setETA(data.eta);
+  //   } catch (error) {
+  //     console.error("❌ Error:", error);
+  //   }
+  // };
+  const fetchGoogleETA = async () => {
     try {
-      console.log("📡 Requesting ETA from backend...");
-      const response = await fetch(`http://155.4.245.117:8000/api/eta?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}`);
+      console.log("📡 Getting current device location...");
+  
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.error("❌ Permission to access location was denied");
+        return;
+      }
+  
+      let currentLocation = await Location.getCurrentPositionAsync({});
+      const userLatitude = currentLocation.coords.latitude;
+      const userLongitude = currentLocation.coords.longitude;
+  
+      console.log("📍 Current device location:", userLatitude, userLongitude);
+  
+      if (!destination) {
+        console.error("❌ Destination is missing");
+        return;
+      }
+  
+      console.log("📡 Requesting ETA from backend using live location...");
+      const response = await fetch(
+        `http://155.4.245.117:8000/api/eta?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+      );
+  
       const data = await response.json();
   
       if (data.error) {
@@ -441,27 +545,13 @@ const MapComponent = () => {
       console.log("🕒 Updated ETA:", data.eta);
       setETA(data.eta);
     } catch (error) {
-      console.error("❌ Error:", error);
+      console.error("❌ Error fetching current location or ETA:", error);
     }
   };
   
+  
 
-  // ✅ Fetch ETA when the trip changes
-  useEffect(() => {
-    if (trip) {
-      console.log("📍 Trip updated:", trip);
-      const { Start, End } = trip;
-      const trimmedStart = Start.split(",").map((item: string) => parseFloat(item.trim()));
-      const trimmedEnd = End.split(",").map((item: string) => parseFloat(item.trim()));
 
-      setOrigin({ latitude: trimmedStart[0], longitude: trimmedStart[1] });
-      setDestination({ latitude: trimmedEnd[0], longitude: trimmedEnd[1] });
-
-      if (googleApiKey) {
-        fetchGoogleETA(); // 🔹 Fetch ETA when trip updates
-      }
-    }
-  }, [trip, googleApiKey]);
 
   useEffect(() => {
     (async () => {
@@ -544,9 +634,17 @@ const MapComponent = () => {
         </MapView>
       )}
 
-      <View style={styles.mapBottomBar}>
+      {/* <View style={styles.mapBottomBar}>
         <TouchableOpacity onPress={startTrip} style={styles.buttonStartTrip}>
           <Text style={styles.buttonStartTripText}> Start Trip </Text>
+        </TouchableOpacity>
+        <Text style={styles.ETA}>{estimatedTimeArrival ? "ETA: " + estimatedTimeArrival : "ETA: Not Available"}</Text>
+      </View> */}
+      <View style={styles.mapBottomBar}>
+        <TouchableOpacity onPress={isActiveTrip ? stopTrip : startTrip} style={styles.buttonStartTrip}>
+          <Text style={styles.buttonStartTripText}>
+            {isActiveTrip ? "Stop Trip" : "Start Trip"}
+          </Text>
         </TouchableOpacity>
         <Text style={styles.ETA}>{estimatedTimeArrival ? "ETA: " + estimatedTimeArrival : "ETA: Not Available"}</Text>
       </View>
