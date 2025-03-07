@@ -524,12 +524,14 @@ useEffect(() => {
       const userLongitude = currentLocation.coords.longitude;
   
       console.log("📍 Current device location:", userLatitude, userLongitude);
+
+      
+      console.log(destination, origin)
   
       if (!destination) {
         console.error("❌ Destination is missing");
         return;
       }
-  
       console.log("📡 Requesting ETA from backend using live location...");
       const response = await fetch(
         `http://155.4.245.117:8000/api/eta?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
