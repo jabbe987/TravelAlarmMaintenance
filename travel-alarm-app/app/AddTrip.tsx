@@ -20,12 +20,16 @@ const AddTrip = () => {
     const [locations, setLocations] = useState<Array<{ label: string; value: string}>>([]);
     const [startPoint, setStartPoint] = useState("");
     const [endPoint, setEndPoint] = useState("");
+    const [startCoord, setStartCoord] = useState("");
+    const [endCoord, setEndCoord] = useState("");
     const [alarm, setAlarm] = useState("");
     const [openStart, setOpenStart] = useState(false);
     const [openEnd, setOpenEnd] = useState(false);
     const [openAlarm, setOpenAlarm] = useState(false);
     const [googleApiKey, setGoogleApiKey] = useState<string | null>(null);
     const [filteredLocations, setFilteredLocations] = useState(locations);
+    const [showStartPoint, setShowStartPoint] = useState(false);
+    const [showEndPoint, setShowEndPoint] = useState(false);
     const [items, setItems] = useState([
         { label: "Alarm one", value: "Alarm one" },
         { label: "Alarm two", value: "Alarm two" },
@@ -34,11 +38,27 @@ const AddTrip = () => {
 
     const route = useRoute<AddTripScreenRouteProp>();
 
+    const checkIfTextIsEmpty = (text: string) => {
+      if (text.length > 0) {
+        return true
+      }
+
+      return false
+    }
+
     const handleChange = (text: string, type: string) => {
       if (type == "START") {
         setStartPoint(text);
+
+        let checker = checkIfTextIsEmpty(text);
+
+        setShowStartPoint(checker)
       } else {
         setEndPoint(text)
+
+        let checker = checkIfTextIsEmpty(text);
+
+        setShowEndPoint(checker)
       }
 
       setFilteredLocations(
@@ -86,8 +106,51 @@ const AddTrip = () => {
 
     const handleSubmit = async () => {
         //TODO:  CREATE USER CONTEXT TO USE ID ALL OVER APPLICATION, USE DISTANCE ROUTER TO CALCULATE ETA
+
+        console.log(startPoint, endPoint, locations);
+        await new Promise<void>((resolve) => {
+          locations.map((loc) => {
+            console.log(loc.label, startPoint)
+            if (startPoint == loc.label) {
+              setStartCoord(loc.value);
+              resolve();
+            } else if (endPoint == loc.label) {
+              setEndCoord(loc.value);
+              resolve();
+            }
+          })
+        })
+
+        console.log(startPoint + ": " + startCoord + ", " + endPoint + ": " + endCoord + "; " + googleApiKey);
+
+        if (startCoord.length == 0) {
+          const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(startPoint)}&key=${googleApiKey}`)
+
+          const data = await response.json();
+
+          if (data.status === "OK") {
+              const { lat, lng } = data.results[0].geometry.location;
+              console.log(`Latitude: ${lat}, Longitude: ${lng}`);
+          } else {
+              console.error("Error getting location for start point, please use one that already exists: ", data.status);
+              return
+          }
+        } else if (endCoord.length == 0) {
+          const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(endPoint)}&key=${googleApiKey}`)
+
+          const data = await response.json();
+
+          if (data.status === "OK") {
+              const { lat, lng } = data.results[0].geometry.location;
+              console.log(`Latitude: ${lat}, Longitude: ${lng}`);
+          } else {
+              console.error("Error getting location for end point, please use one that already exists: ", data.status);
+              return
+          }
+        }
+
         const response = await axios.post('http://155.4.245.117:8000/api/addtrip', 
-          { Alarm_ID: 0, User_ID: 1, Start: startPoint, End: endPoint, ETA: ""})
+          { Alarm_ID: 0, User_ID: 1, Start: startCoord, End: endCoord, ETA: ""})
         .then(response => {
           console.log("Success", response)
         })
@@ -97,60 +160,66 @@ const AddTrip = () => {
         
     }
 
-    const closeDropdown = (val) => {
-      
+    const closeDropdownStart = (val: boolean) => {
+      setShowStartPoint(!val)
+    }
+
+    const closeDropdownEnd = (val: boolean) => {
+      setShowEndPoint(!val)
     }
 
     return (
 
         <View style={styles.container}>
-
-              <TextInput
-                value={startPoint}
-                onChangeText={((value) => handleChange(value, "START"))}
-                placeholder="Type to search..."
-                style={styles.input}
-              />
-              {filteredLocations.length > 0 && startPoint != null && startPoint.length > 0 &&  (
-                <TouchableWithoutFeedback onPress={closeDropdown(showStartPoint)}> 
-                <View style={styles.dropdownWrapper}>
-                  <FlatList
-                    data={filteredLocations}
-                    keyExtractor={(item) => item.label}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity onPress={() => setStartPoint(item.label)}>
-                        <Text style={styles.listItem}>{item.label}</Text>
-                      </TouchableOpacity>
-                    )}
-                  />
-                </View>
-                </TouchableWithoutFeedback>
-              )}
-
-              
-              <TextInput
-                value={endPoint}
-                onChangeText={((value) => handleChange(value, "END"))}
-                placeholder="Type to search..."
-                style={styles.input}
-              />
-              {filteredLocations.length > 0 && endPoint != null && endPoint.length > 0 &&  (
-                <TouchableWithoutFeedback onPress={closeDropdown(showEndPoint)}> 
+              <View>
+                <TextInput
+                  value={startPoint}
+                  onChangeText={((value) => handleChange(value, "START"))}
+                  placeholder="Type to search..."
+                  style={styles.input}
+                />
+                {showStartPoint && filteredLocations.length > 0 && startPoint != null && startPoint.length > 0 &&  (
+                  <TouchableWithoutFeedback onPress={() => closeDropdownStart(showStartPoint)}> 
                   <View style={styles.dropdownWrapper}>
                     <FlatList
                       data={filteredLocations}
                       keyExtractor={(item) => item.label}
                       renderItem={({ item }) => (
-                        <TouchableOpacity onPress={() => setStartPoint(item.label)}>
+                        <TouchableOpacity onPress={() => {setStartPoint(item.label); closeDropdownStart(showStartPoint)}}>
                           <Text style={styles.listItem}>{item.label}</Text>
                         </TouchableOpacity>
                       )}
                     />
                   </View>
-                </TouchableWithoutFeedback>
-              )}
+                  </TouchableWithoutFeedback>
+                )}
+              </View>
 
-              <DropDownPicker
+              <View>
+                <TextInput
+                  value={endPoint}
+                  onChangeText={((value) => handleChange(value, "END"))}
+                  placeholder="Type to search..."
+                  style={styles.input}
+                />
+                {showEndPoint && filteredLocations.length > 0 && endPoint != null && endPoint.length > 0 &&  (
+                  <TouchableWithoutFeedback onPress={() => closeDropdownEnd(showEndPoint)}> 
+                    <View style={styles.dropdownWrapper}>
+                      <FlatList
+                        data={filteredLocations}
+                        keyExtractor={(item) => item.label}
+                        renderItem={({ item }) => (
+                          <TouchableOpacity onPress={() => {setEndPoint(item.label); closeDropdownEnd(showEndPoint);}}>
+                            <Text style={styles.listItem}>{item.label}</Text>
+                          </TouchableOpacity>
+                        )}
+                      />
+                    </View>
+                  </TouchableWithoutFeedback>
+                )}
+              </View>
+
+              {/* <DropDownPicker
                   open={openAlarm}
                   value={alarm}
                   items={items}
@@ -160,7 +229,9 @@ const AddTrip = () => {
                   placeholder= "Select Alarm..."
                   containerStyle={styles.dropdownContainer}
                   style={[styles.dropdownStyle, { zIndex: openAlarm ? 3 : 1 }]}
-              /> 
+                  dropDownContainerStyle={{ zIndex: 2000, elevation: 20 }} // Ensure dropdown opens above others
+                  modalProps={{ transparent: true }}
+              />  */}
 
             <Button title="Submit" onPress={handleSubmit}/>
         </View>        
@@ -172,6 +243,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     padding: 10,
+    position: "relative"
   },
   input: {
     backgroundColor: "grey",
@@ -187,15 +259,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   dropdownWrapper: {
-    position: 'absolute',  
-    top: 100,  
+    position: 'absolute',  // Add this if not already set
+    top: 50,  // Adjust based on input field position
     left: 10,
     right: 10,
-    zIndex: 2,  
+    zIndex: 1000,  // Set a high zIndex
     backgroundColor: 'white',
     maxHeight: 150,
     borderWidth: 1,
     borderRadius: 5,
+    elevation: 10,  // Android shadow fix
+    shadowColor: '#000',  // iOS shadow fix
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   dropdown: {
     width: '100%',
