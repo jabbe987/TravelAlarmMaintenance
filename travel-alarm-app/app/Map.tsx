@@ -6,6 +6,9 @@ import polyline from "@mapbox/polyline";
 import { Trip, RootStackParamList } from "./types";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import ETAUpdater from "./ETAUpdater"; // ✅ Keeps the ETA updater for active trips
+import { selectionAsync } from "expo-haptics";
+import { Picker } from '@react-native-picker/picker';
+
 
 const OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving";
 const GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
@@ -23,6 +26,8 @@ const MapComponent = () => {
   const [isActiveTrip, setIsActiveTrip] = useState(false);
   const [googleApiKey, setGoogleApiKey] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [selectedMode, setSelectedMode] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const mapRef = useRef<MapView | null>(null);
   const route = useRoute<MapScreenRouteProp>();
@@ -43,8 +48,14 @@ const MapComponent = () => {
   }, []);
 
   const startTrip = async () => {
+    // if(selectedMode!) {
+    //   console.log("Please select a mode first!");
+    //   return;
+    // }
     console.log("Starting Trip");
     setIsActiveTrip(true);
+    setShowDropdown(false);
+    
 
     if(intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -61,6 +72,7 @@ const MapComponent = () => {
   const stopTrip = async () => {
     console.log("Stopping Trip");
     setIsActiveTrip(false);
+    setSelectedMode('');
 
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -129,21 +141,74 @@ useEffect(() => {
       //   return;
       // }
       console.log("📡 Requesting ETA from backend using live location...");
-      const response = await fetch(
-        `http://155.4.245.117:8000/api/eta?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
-      );
-  
-      const data = await response.json();
-  
-      if (data.error) {
-        console.error("❌ Error fetching ETA:", data.error);
-        return;
+      if(selectedMode == "driving") {
+        const response = await fetch(
+          `http://155.4.245.117:8000/api/eta?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+        );
+        const data = await response.json();
+
+        if (data.error) {
+          console.error("❌ Error fetching ETA:", data.error);
+          return;
+        }
+    
+        console.log("🕒 Updated ETA:", data.eta);
+        console.log("Updated Distance:", data.distance);
+        setETA(data.eta);
       }
+      if(selectedMode == "walking") {
+        const response = await fetch(
+          `http://155.4.245.117:8000/api/etawalk?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+        );
+        const data = await response.json();
+
+        if (data.error) {
+          console.error("❌ Error fetching ETA:", data.error);
+          return;
+        }
+    
+        console.log("🕒 Updated ETA:", data.eta);
+        console.log("Updated Distance:", data.distance);
+        setETA(data.eta);
+
+      }
+
+      if(selectedMode == "bycycling") {
+
+        const response = await fetch(
+          `http://155.4.245.117:8000/api/etabike?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+        );
+        const data = await response.json();
+
+        if (data.error) {
+          console.error("❌ Error fetching ETA:", data.error);
+          return;
+        }
+    
+        console.log("🕒 Updated ETA:", data.eta);
+        console.log("Updated Distance:", data.distance);
+        setETA(data.eta);
+      }
+
+      if(selectedMode == "transit") {
+        const response = await fetch(
+          `http://155.4.245.117:8000/api/etatransit?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+        );
+        const data = await response.json();
+
+        if (data.error) {
+          console.error("❌ Error fetching ETA:", data.error);
+          return;
+        }
+    
+        console.log("🕒 Updated ETA:", data.eta);
+        console.log("Updated Distance:", data.distance);
+        setETA(data.eta);
+      }
+
   
-      console.log("🕒 Updated ETA:", data.eta);
-      console.log("Updated Distance:", data.distance);
-      setETA(data.eta);
       
+
     } 
     catch (error) {
       console.log("❌ Error fetching current location or ETA:", error);
@@ -207,7 +272,6 @@ useEffect(() => {
       }
     }
   };
-
   return (
     <View style={styles.container}>
       {userLocation && (
@@ -235,25 +299,45 @@ useEffect(() => {
         </MapView>
       )}
 
-      {/* <View style={styles.mapBottomBar}>
-        <TouchableOpacity onPress={startTrip} style={styles.buttonStartTrip}>
-          <Text style={styles.buttonStartTripText}> Start Trip </Text>
-        </TouchableOpacity>
-        <Text style={styles.ETA}>{estimatedTimeArrival ? "ETA: " + estimatedTimeArrival : "ETA: Not Available"}</Text>
-      </View> */}
       <View style={styles.mapBottomBar}>
-        <TouchableOpacity onPress={isActiveTrip ? stopTrip : startTrip} style={styles.buttonStartTrip}>
-          <Text style={styles.buttonStartTripText}>
-            {isActiveTrip ? "Stop Trip" : "Start Trip"}
-          </Text>
-        </TouchableOpacity>
-        <Text style={styles.ETA}>{estimatedTimeArrival ? "ETA: " + estimatedTimeArrival : "ETA: Not Available"}</Text>
+        {!isActiveTrip && !showDropdown && (
+          <TouchableOpacity onPress={() => setShowDropdown(true)} style={styles.buttonStartTrip}>
+            <Text style={styles.buttonStartTripText}>Start Trip</Text>
+          </TouchableOpacity>
+        )}
+
+        {showDropdown && (
+          <View>
+            <Picker
+              selectedValue={selectedMode}
+              onValueChange={(itemValue) => setSelectedMode(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select Mode" value="" />
+              <Picker.Item label="Car" value="driving" />
+              <Picker.Item label="Walk" value="walking" />
+              <Picker.Item label="Bike" value="bicycling" />
+              <Picker.Item label="Transit" value="transit" />
+            </Picker>
+            <TouchableOpacity onPress={startTrip} style={styles.buttonStartTrip}>
+              <Text style={styles.buttonStartTripText}>Confirm Mode & Start Trip</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {isActiveTrip && (
+          <TouchableOpacity onPress={stopTrip} style={styles.buttonStartTrip}>
+            <Text style={styles.buttonStartTripText}>Stop Trip</Text>
+          </TouchableOpacity>
+        )}
+
+        <Text style={styles.ETA}>{estimatedTimeArrival ? 'ETA: ' + estimatedTimeArrival : 'ETA: Not Available'}</Text>
       </View>
 
       {isActiveTrip && <ETAUpdater setETA={setETA} />}
     </View>
   );
-};
+}
 
 export default MapComponent;
 
@@ -280,4 +364,80 @@ const styles = StyleSheet.create({
   },
   buttonStartTripText: { color: "white", fontSize: 14 },
   ETA: { color: "white", fontSize: 14, paddingLeft: 10 },
+  picker: {
+    height: 50,
+    width: '100%',
+    backgroundColor: 'blue',
+    color: 'white',
+  },
 });
+
+
+
+//   return (
+//     <View style={styles.container}>
+//       {userLocation && (
+//         <MapView
+//           ref={mapRef}
+//           style={styles.map}
+//           initialRegion={{
+//             latitude: userLocation.latitude,
+//             longitude: userLocation.longitude,
+//             latitudeDelta: 0.05,
+//             longitudeDelta: 0.05,
+//           }}
+//           showsUserLocation
+//         >
+//           {origin && destination && (
+//             <>
+//               <Marker coordinate={origin} title="Start" />
+//               <Marker coordinate={destination} title="Destination" />
+//             </>
+//           )}
+
+//           {routeCoordinates.length > 0 && (
+//             <Polyline coordinates={routeCoordinates} strokeWidth={4} strokeColor="blue" />
+//           )}
+//         </MapView>
+//       )}
+
+//       <View style={styles.mapBottomBar}>
+//         <TouchableOpacity onPress={isActiveTrip ? stopTrip : startTrip} style={styles.buttonStartTrip}>
+//           <Text style={styles.buttonStartTripText}>
+//             {isActiveTrip ? "Stop Trip" : "Start Trip"}
+//           </Text>
+//         </TouchableOpacity>
+//         <Text style={styles.ETA}>{estimatedTimeArrival ? "ETA: " + estimatedTimeArrival : "ETA: Not Available"}</Text>
+//       </View>
+
+//       {isActiveTrip && <ETAUpdater setETA={setETA} />}
+//     </View>
+//   );
+// };
+
+// export default MapComponent;
+
+// const styles = StyleSheet.create({
+//   container: { flex: 1, justifyContent: "center", alignItems: "center" },
+//   map: { width: "100%", height: "100%" },
+//   mapBottomBar: {
+//     position: "absolute",
+//     bottom: 0,
+//     left: 0,
+//     right: 0,
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//     padding: 15,
+//     backgroundColor: "rgba(0, 0, 0, 0.7)",
+//   },
+//   buttonStartTrip: {
+//     backgroundColor: "blue",
+//     borderRadius: 5,
+//     paddingHorizontal: 20,
+//     paddingVertical: 10,
+//     alignItems: "center",
+//   },
+//   buttonStartTripText: { color: "white", fontSize: 14 },
+//   ETA: { color: "white", fontSize: 14, paddingLeft: 10 },
+// });
