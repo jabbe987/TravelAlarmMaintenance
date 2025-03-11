@@ -27,7 +27,7 @@ router.post('/addLocation', (req, res) => {
     }
     
     db.query(
-        'INSERT INTO Locations (Name, Coordinates) VALUES (?, ?)',
+        'INSERT INTO Location (Name, Coordinates) VALUES (?, ?)',
         [label, value],
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });

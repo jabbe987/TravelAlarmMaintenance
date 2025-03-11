@@ -121,27 +121,25 @@ const AddTrip = () => {
 
           resolve();
         })
-
+        let startCoordString = ""
         if (startCoord.length == 0) {
-          axios.get('http://155.4.245.117:8000/api/distance', {
+          const responseGet = await axios.get('http://155.4.245.117:8000/api/distance', {
             params: {
                 origins: startPoint,
                 destinations: "Uppsala"
             }
           })
-          .then(response => {
-              let data = response.data.origin
 
-              let coordString = data["latitude"] + ", " + data["longitude"]
-              
-              setStartCoord(coordString)
-          })
-          .catch(error => {
-              console.error('Error fetching distance:', error);
-          });
+          let data = responseGet.data.origin
 
-          const response = await axios.post('http://155.4.245.117:8000/api/addLocations', 
-            { startPoint, startCoord})
+          startCoordString = data["latitude"] + ", " + data["longitude"]
+          console.log("START COORD STRING SET", startCoordString)
+          setStartCoord(startCoordString)
+          
+
+          console.log("INSERTING LOC: ", startCoordString, startPoint)
+          const response = await axios.post('http://155.4.245.117:8000/api/addLocation', 
+            { startPoint, startCoordString})
             .then(response => {
               console.log("Success", response)
             })
@@ -149,29 +147,24 @@ const AddTrip = () => {
               console.log("Error posting locations - ", error)
             })
         }
-        
+
+        let endCoordString = ""
         if (endCoord.length == 0) {
-          axios.get('http://155.4.245.117:8000/api/distance', {
+          const responseGet = await axios.get('http://155.4.245.117:8000/api/distance', {
             params: {
                 origins: endPoint,
                 destinations: "Uppsala"
             }
           })
-          .then(response => {
-            let data = response.data.origin
+          let data = responseGet.data.origin
 
-            let coordString = data["latitude"] + ", " + data["longitude"]
-            
-            setEndCoord(coordString)
+          endCoordString = data["latitude"] + ", " + data["longitude"]
+          console.log("END COORD STRING SET", endCoordString)
+          setEndCoord(endCoordString)
 
-          })
-          .catch(error => {
-              console.error('Error fetching distance:', error);
-          });
-
-
-          const response = await axios.post('http://155.4.245.117:8000/api/addLocations', 
-            { endPoint, endCoord})
+          console.log("INSERTING LOC: ", endPoint, endCoordString)
+          const response = await axios.post('http://155.4.245.117:8000/api/addLocation', 
+            { endPoint, endCoordString})
             .then(response => {
               console.log("Success", response)
             })
