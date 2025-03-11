@@ -57,4 +57,36 @@ router.post('/settings', (req, res) => {
     );
 });
 
+router.get('/alarm/:userId', (req, res) => {
+    const { userId } = req.params;
+
+    db.query('SELECT Alarm_ID FROM User WHERE User_ID = ?', [userId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(results[0]); // Return alarm ID
+    });
+});
+
+router.post('/alarm', (req, res) => {
+    const { userId, alarmId } = req.body;
+
+    if (!userId || !alarmId) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    db.query('UPDATE User SET Alarm_ID = ? WHERE User_ID = ?', [alarmId, userId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ message: 'Alarm sound updated successfully' });
+    });
+});
+
 module.exports = router;
