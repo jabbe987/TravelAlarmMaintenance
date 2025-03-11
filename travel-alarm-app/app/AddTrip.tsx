@@ -106,7 +106,6 @@ const AddTrip = () => {
 
     const handleSubmit = async () => {
         //TODO:  CREATE USER CONTEXT TO USE ID ALL OVER APPLICATION, USE DISTANCE ROUTER TO CALCULATE ETA
-
         console.log(startPoint, endPoint, locations);
         await new Promise<void>((resolve) => {
           locations.map((loc) => {
@@ -124,39 +123,68 @@ const AddTrip = () => {
         console.log(startPoint + ": " + startCoord + ", " + endPoint + ": " + endCoord + "; " + googleApiKey);
 
         if (startCoord.length == 0) {
-          const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(startPoint)}&key=${googleApiKey}`)
+          fetch(`https://nominatim.openstreetmap.org/search?q=${startPoint}&format=json`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.length > 0) {
+              console.log("Latitude:", data[0].lat);
+              console.log("Longitude:", data[0].lon);
+            } else {
+              console.log("No results found");
+            }
+          })
+          .catch(error => console.error(error));
 
-          const data = await response.json();
 
-          if (data.status === "OK") {
-              const { lat, lng } = data.results[0].geometry.location;
-              console.log(`Latitude: ${lat}, Longitude: ${lng}`);
-          } else {
-              console.error("Error getting location for start point, please use one that already exists: ", data.status);
-              return
-          }
+          // const data = await response.json();
+
+          // if (data.status === "OK") {
+          //     const { lat, lng } = data.results[0].geometry.location;
+          //     console.log(`Latitude: ${lat}, Longitude: ${lng}`);
+          // } else {
+          //     console.error("Error getting location for start point, please use one that already exists: ", data.status);
+          //     return
+          // }
         } else if (endCoord.length == 0) {
-          const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(endPoint)}&key=${googleApiKey}`)
+          axios.get('http://155.4.245.117:8000/api/distance', {
+            params: {
+                origins: endPoint,
+                destinations: "uppsala"
+            }
+          })
+          .then(response => {
+              console.log(response.data)
+              const result = response.data.rows[0].elements[0];
+              console.log(result)
+              if (result.status === 'OK') {
+                console.log(result)
+              }
+          })
+          .catch(error => {
+              console.error('Error fetching distance:', error);
+          });
 
-          const data = await response.json();
+          // const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(endPoint)}&key=${googleApiKey}`)
 
-          if (data.status === "OK") {
-              const { lat, lng } = data.results[0].geometry.location;
-              console.log(`Latitude: ${lat}, Longitude: ${lng}`);
-          } else {
-              console.error("Error getting location for end point, please use one that already exists: ", data.status);
-              return
-          }
+          // const data = await response.json();
+
+          // if (data.status === "OK") {
+          //     const { lat, lng } = data.results[0].geometry.location;
+          //     console.log(`Latitude: ${lat}, Longitude: ${lng}`);
+          // } else {
+          //     console.error("Error getting location for end point, please use one that already exists: ", data.status);
+          //     return
+          // }
         }
 
-        const response = await axios.post('http://155.4.245.117:8000/api/addtrip', 
-          { Alarm_ID: 0, User_ID: 1, Start: startCoord, End: endCoord, ETA: ""})
-        .then(response => {
-          console.log("Success", response)
-        })
-        .catch(error => {
-          console.log("Error posting trip - ", error)
-        })
+        // const response = await axios.post('http://155.4.245.117:8000/api/addtrip', 
+        //   { Alarm_ID: 0, User_ID: 1, Start: startCoord, End: endCoord, ETA: ""})
+        // .then(response => {
+        //   console.log("Success", response)
+        // })
+        // .catch(error => {
+        //   console.log("Error posting trip - ", error)
+        // })
         
     }
 

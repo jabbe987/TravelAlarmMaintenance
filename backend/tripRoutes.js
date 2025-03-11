@@ -15,7 +15,6 @@ const db = mysql.createConnection({
 
 // List all trips
 router.get('/trips', (req, res) => {
-    console.log("LISTING TRIPS LOCALLY")
     db.query('SELECT * FROM Trip', (err, results) => {
         console.log(results)
         if (err) return res.status(500).json({ error: err.message });
