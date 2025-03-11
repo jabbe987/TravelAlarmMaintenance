@@ -10,10 +10,8 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const checkUserSelection = async () => {
-      const storedUser = await AsyncStorage.getItem("selectedUser");
-      if (storedUser) {
-        setSelectedUser(storedUser);
-      }
+      await AsyncStorage.removeItem("selectedUser");
+      setSelectedUser(null);
       setLoading(false);
     };
     checkUserSelection();
@@ -61,6 +59,9 @@ export default function HomeScreen() {
 
       {/* 🚀 New Button to Distance View */}
       <Button title="Settings" onPress={() => router.push("/SettingsView")} />
+        
+      {/* 🚀 New Button to Sound View */}
+      <Button title="Go to Sound View" onPress={() => router.push("/SoundView")} />
     </View>
   );
 }

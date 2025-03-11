@@ -39,6 +39,7 @@ export default function RootLayout() {
         <Stack.Screen name="Map" options={{ title: "Map View", headerTitleAlign:"center", headerTitleStyle: {fontSize: 18, maxWidth: 200}, headerRight: () => (<DropDown/>)}}/>
         <Stack.Screen name="WebMap" options={{title: "Web Map View" }}/>
         <Stack.Screen name="DistanceView" options={{ title: "Distance API view"}}/>
+        <Stack.Screen name="SoundView" options={{ title: 'Sound Selection' }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
