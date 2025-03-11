@@ -28,12 +28,14 @@ router.get('/eta', async (req, res) => {
       console.error("❌ Google Maps API error:", data.error_message || data.status);
       return res.status(400).json({ error: data.error_message || data.status });
     }
-
+    
     const elements = data.rows[0].elements[0];
     const etaText = elements.duration.text;
+    const distanceText = elements.distance.text; 
 
     console.log("🕒 Updated ETA:", etaText);
-    res.json({ eta: etaText });
+    console.log("Updated Distance:", distanceText); 
+    res.json({ eta: etaText, distance: distanceText });
   } catch (error) {
     console.error("❌ Error fetching ETA:", error);
     res.status(500).json({ error: "Internal server error" });
