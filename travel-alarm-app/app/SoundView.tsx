@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, Button, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
-import TriggerAlarm from './TriggerAlarm';
+import TriggerAlarm from './TriggerAlarm'; //TriggerAlarm component
 
 // Define your available sounds
 const soundFiles = [
@@ -53,15 +53,15 @@ const SoundView = () => {
         renderItem={renderItem}
       />
 
-      <Button 
+      <Button //TriggerAlarm component
         title="Trigger Alarm" 
         onPress={() => {
           console.log("Trigger Alarm button pressed!");
           setAlarmVisible(true);
         }} 
       />
-
-      <TriggerAlarm visible={alarmVisible} onClose={() => setAlarmVisible(false)} />
+      {/* TriggerAlarm component */}
+      <TriggerAlarm visible={alarmVisible} onClose={() => setAlarmVisible(false)} /> 
 
     </View>
     
