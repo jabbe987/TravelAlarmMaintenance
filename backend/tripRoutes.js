@@ -15,7 +15,7 @@ const db = mysql.createConnection({
 
 // List all trips
 router.get('/trips', (req, res) => {
-    console.log("LISTING TRIPS LOCALLY")
+    // console.log("LISTING TRIPS LOCALLY")
     db.query('SELECT * FROM Trip', (err, results) => {
         console.log(results)
         if (err) return res.status(500).json({ error: err.message });
@@ -45,7 +45,7 @@ function parseToMySQLTime(duration) {
 
 // Add a new trip
 router.post('/addtrip', (req, res) => {
-    console.log("ADDING TRIPS LOCALLY")
+    // console.log("ADDING TRIPS LOCALLY")
     const { Alarm_ID, User_ID, Start, End, ETA } = req.body;
     console.log(Alarm_ID, User_ID, Start, End, ETA)
     if (User_ID == null|| Start == null || End == null || ETA == null) {
