@@ -118,64 +118,70 @@ const AddTrip = () => {
               resolve();
             }
           })
+
+          resolve();
         })
 
-        console.log(startPoint + ": " + startCoord + ", " + endPoint + ": " + endCoord + "; " + googleApiKey);
-
         if (startCoord.length == 0) {
-          fetch(`https://nominatim.openstreetmap.org/search?q=${startPoint}&format=json`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.length > 0) {
-              console.log("Latitude:", data[0].lat);
-              console.log("Longitude:", data[0].lon);
-            } else {
-              console.log("No results found");
-            }
-          })
-          .catch(error => console.error(error));
-
-
-          // const data = await response.json();
-
-          // if (data.status === "OK") {
-          //     const { lat, lng } = data.results[0].geometry.location;
-          //     console.log(`Latitude: ${lat}, Longitude: ${lng}`);
-          // } else {
-          //     console.error("Error getting location for start point, please use one that already exists: ", data.status);
-          //     return
-          // }
-        } else if (endCoord.length == 0) {
           axios.get('http://155.4.245.117:8000/api/distance', {
             params: {
-                origins: endPoint,
-                destinations: "uppsala"
+                origins: startPoint,
+                destinations: "Uppsala"
             }
           })
           .then(response => {
-              console.log(response.data)
-              const result = response.data.rows[0].elements[0];
-              console.log(result)
-              if (result.status === 'OK') {
-                console.log(result)
-              }
+              let data = response.data.origin
+
+              let coordString = data["latitude"] + ", " + data["longitude"]
+              
+              setStartCoord(coordString)
           })
           .catch(error => {
               console.error('Error fetching distance:', error);
           });
 
-          // const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(endPoint)}&key=${googleApiKey}`)
-
-          // const data = await response.json();
-
-          // if (data.status === "OK") {
-          //     const { lat, lng } = data.results[0].geometry.location;
-          //     console.log(`Latitude: ${lat}, Longitude: ${lng}`);
-          // } else {
-          //     console.error("Error getting location for end point, please use one that already exists: ", data.status);
-          //     return
-          // }
+          const response = await axios.post('http://155.4.245.117:8000/api/addLocations', 
+            { startPoint, startCoord})
+            .then(response => {
+              console.log("Success", response)
+            })
+            .catch(error => {
+              console.log("Error posting locations - ", error)
+            })
         }
+        
+        if (endCoord.length == 0) {
+          axios.get('http://155.4.245.117:8000/api/distance', {
+            params: {
+                origins: endPoint,
+                destinations: "Uppsala"
+            }
+          })
+          .then(response => {
+            let data = response.data.origin
+
+            let coordString = data["latitude"] + ", " + data["longitude"]
+            
+            setEndCoord(coordString)
+
+          })
+          .catch(error => {
+              console.error('Error fetching distance:', error);
+          });
+
+
+          const response = await axios.post('http://155.4.245.117:8000/api/addLocations', 
+            { endPoint, endCoord})
+            .then(response => {
+              console.log("Success", response)
+            })
+            .catch(error => {
+              console.log("Error posting locations - ", error)
+            })
+            
+        }
+
+        console.log(startCoord, endCoord)
 
         // const response = await axios.post('http://155.4.245.117:8000/api/addtrip', 
         //   { Alarm_ID: 0, User_ID: 1, Start: startCoord, End: endCoord, ETA: ""})

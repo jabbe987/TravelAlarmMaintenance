@@ -15,6 +15,7 @@ const db = mysql.createConnection({
 
 // List all trips
 router.get('/trips', (req, res) => {
+    // console.log("LISTING TRIPS LOCALLY")
     db.query('SELECT * FROM Trip', (err, results) => {
         console.log(results)
         if (err) return res.status(500).json({ error: err.message });
@@ -44,9 +45,9 @@ function parseToMySQLTime(duration) {
 
 // Add a new trip
 router.post('/addtrip', (req, res) => {
-    console.log("ADDING TRIPS LOCALLY")
+    // console.log("ADDING TRIPS LOCALLY")
     const { Alarm_ID, User_ID, Start, End, ETA } = req.body;
-    console.log(Alarm_ID, User_ID, Start, End, ETA)
+    // console.log(Alarm_ID, User_ID, Start, End, ETA)
     if (User_ID == null|| Start == null || End == null || ETA == null) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -58,7 +59,7 @@ router.post('/addtrip', (req, res) => {
         'INSERT INTO Trip (Alarm_ID, User_ID, Start, End, ETA) VALUES (?, ?, ?, ?, ?)',
         [Alarm_ID || null, User_ID, Start, End, parsedETA],
         (err, results) => {
-            console.log("RESULT: ", err, results)
+            // console.log("RESULT: ", err, results)
             if (err) return res.status(500).json({ error: err.message });
             res.json({ message: 'Trip added successfully', id: results.insertId });
         }
