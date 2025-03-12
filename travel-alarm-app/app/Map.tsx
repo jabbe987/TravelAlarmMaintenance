@@ -60,7 +60,7 @@ const MapComponent = () => {
     if(intervalRef.current) {
       clearInterval(intervalRef.current);
     } 
-
+    await fetchOSRMRoute();
     fetchGoogleETA();
 
     intervalRef.current = setInterval(() => {
@@ -238,8 +238,10 @@ useEffect(() => {
   }, [route.params?.trip]);
 
   useEffect(() => {
+    if(origin && destination && selectedMode) {
     fetchOSRMRoute();
-  }, [origin, destination]);
+    }
+  }, [origin, destination, selectedMode]);
 
   useEffect(() => {
     if (isActiveTrip) {
@@ -248,30 +250,67 @@ useEffect(() => {
     }
   }, [isActiveTrip]);
   // ✅ Fetch route from OSRM
+  // const fetchOSRMRoute = async () => {
+  //   if (origin !== null && destination !== null) {
+  //     const url = `${OSRM_API_URL}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
+  //     try {
+  //       const response = await fetch(url);
+  //       const data = await response.json();
+
+  //       if (data.routes.length > 0) {
+  //         const points: [number, number][] = polyline.decode(data.routes[0].geometry);
+  //         const routeCoords = points.map(([lat, lng]) => ({ latitude: lat, longitude: lng }));
+  //         setRouteCoordinates(routeCoords);
+
+  //         if (mapRef.current) {
+  //           mapRef.current.fitToCoordinates(routeCoords, {
+  //             edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+  //             animated: true,
+  //           });
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("❌ Error fetching OSRM route:", error);
+  //     }
+  //   }
+  // };
   const fetchOSRMRoute = async () => {
-    if (origin !== null && destination !== null) {
-      const url = `${OSRM_API_URL}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
+    if (origin !== null && destination !== null && selectedMode) {
+      // Dynamically adjust the OSRM profile based on the selected mode
+      let profile = 'driving'; // default
+  
+      if (selectedMode === 'walking') profile = 'foot';
+      if (selectedMode === 'bicycling') profile = 'bike';
+      if (selectedMode === 'driving') profile = 'driving';
+  
+      // const url = `https://router.project-osrm.org/route/v1/${profile}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
+      const url = `${OSRM_API_URL}/${profile}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
       try {
         const response = await fetch(url);
         const data = await response.json();
-
-        if (data.routes.length > 0) {
-          const points: [number, number][] = polyline.decode(data.routes[0].geometry);
-          const routeCoords = points.map(([lat, lng]) => ({ latitude: lat, longitude: lng }));
+  
+        if (data.routes && data.routes.length > 0) {
+          const points = polyline.decode(data.routes[0].geometry);
+          const routeCoords = points.map(([lat, lng]) => ({ latitude: lat, longitude: lng,}));
           setRouteCoordinates(routeCoords);
-
+  
           if (mapRef.current) {
             mapRef.current.fitToCoordinates(routeCoords, {
               edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
               animated: true,
             });
           }
+  
+          console.log(`✅ Route loaded for mode: ${selectedMode}`);
+        } else {
+          console.error(`❌ No route found for mode: ${selectedMode}`);
         }
       } catch (error) {
         console.error("❌ Error fetching OSRM route:", error);
       }
     }
   };
+  
   return (
     <View style={styles.container}>
       {userLocation && (
