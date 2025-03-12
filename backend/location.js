@@ -20,4 +20,20 @@ router.get('/locations', (req, res) => {
     });
 });
 
+router.post('/addLocation', (req, res) => {
+    const { label, value } = req.body;
+    if (label == null|| value == null) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    db.query(
+        'INSERT INTO Location (Name, Coordinates) VALUES (?, ?)',
+        [label, value],
+        (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ message: 'Location added successfully', id: results.insertId });
+        }
+    );
+})
+
 module.exports = router;

@@ -1,7 +1,8 @@
 // app/SoundView.tsx
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, Button, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
+import TriggerAlarm from './TriggerAlarm'; //TriggerAlarm component
 
 // Define your available sounds
 const soundFiles = [
@@ -23,6 +24,7 @@ const soundFiles = [
 
 const SoundView = () => {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [alarmVisible, setAlarmVisible] = useState(false);
 
   const playSound = async (file: any) => {
     // Unload the previous sound if it's still loaded
@@ -50,7 +52,19 @@ const SoundView = () => {
         keyExtractor={(item) => item.name}
         renderItem={renderItem}
       />
+
+      <Button //TriggerAlarm component
+        title="Trigger Alarm" 
+        onPress={() => {
+          console.log("Trigger Alarm button pressed!");
+          setAlarmVisible(true);
+        }} 
+      />
+      {/* TriggerAlarm component */}
+      <TriggerAlarm visible={alarmVisible} onClose={() => setAlarmVisible(false)} /> 
+
     </View>
+    
   );
 };
 
