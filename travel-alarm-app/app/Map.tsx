@@ -283,8 +283,8 @@ useEffect(() => {
       if (selectedMode === 'bicycling') profile = 'bike';
       if (selectedMode === 'driving') profile = 'driving';
   
-      // const url = `https://router.project-osrm.org/route/v1/${profile}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
-      const url = `${OSRM_API_URL}/${profile}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
+      const url = `https://router.project-osrm.org/route/v1/${profile}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
+      // const url = `${OSRM_API_URL}/${profile}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
       try {
         const response = await fetch(url);
         const data = await response.json();
