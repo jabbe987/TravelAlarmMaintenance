@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Modal, View, StyleSheet, Text, TouchableOpacity} from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import polyline from "@mapbox/polyline";
@@ -8,6 +8,9 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import ETAUpdater from "./ETAUpdater"; // ✅ Keeps the ETA updater for active trips
 import { selectionAsync } from "expo-haptics";
 import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Audio } from 'expo-av';
+
 
 
 const OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving";
@@ -28,6 +31,9 @@ const MapComponent = () => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [selectedMode, setSelectedMode] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [alarmType, setAlarmType] = useState<'distance' | 'time'>('distance');
+  const [alarmValue, setAlarmValue] = useState<number | null>(null);
+  const [alarmVisible, setAlarmVisible] = useState(false);
 
   const mapRef = useRef<MapView | null>(null);
   const route = useRoute<MapScreenRouteProp>();
@@ -47,6 +53,29 @@ const MapComponent = () => {
     fetchApiKey();
   }, []);
 
+  useEffect(() => {
+    const fetchAlarmSettings = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('selectedUser');
+        if (!userId) return;
+  
+        const response = await fetch(`http://155.4.245.117:8000/api/settings/${userId}`);
+        const data = await response.json();
+  
+        setAlarmType(data.AlarmType === '0x01' ? 'time' : 'distance');
+        setAlarmValue(data.AlarmValue);
+  
+        console.log(`✅ Alarm settings loaded: Type = ${data.AlarmType}, Value = ${data.AlarmValue}`);
+      } catch (error) {
+        console.error('❌ Error fetching alarm settings:', error);
+      }
+    };
+  
+    fetchAlarmSettings();
+  }, []);
+  
+  
+
   const startTrip = async () => {
     // if(selectedMode!) {
     //   console.log("Please select a mode first!");
@@ -60,7 +89,7 @@ const MapComponent = () => {
     if(intervalRef.current) {
       clearInterval(intervalRef.current);
     } 
-    await fetchOSRMRoute();
+
     fetchGoogleETA();
 
     intervalRef.current = setInterval(() => {
@@ -155,65 +184,101 @@ useEffect(() => {
         console.log("🕒 Updated ETA:", data.eta);
         console.log("Updated Distance:", data.distance);
         setETA(data.eta);
-      }
-      if(selectedMode == "walking") {
-        const response = await fetch(
-          `http://155.4.245.117:8000/api/etawalk?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
-        );
-        const data = await response.json();
 
-        if (data.error) {
-          console.error("❌ Error fetching ETA:", data.error);
-          return;
-        }
+        // ✅ Convert distance and time for comparison
+        let currentDistance = 0;
+        let currentETA = 0;
+
+        if (alarmType === 'distance') {
+          // Convert distance (km or meters to km)
+          if (data.distance.includes('km')) {
+            currentDistance = parseFloat(data.distance.replace(/[^\d.]/g, ''));
+          } else if (data.distance.includes('m')) {
+            currentDistance = parseFloat(data.distance.replace(/[^\d.]/g, '')) / 1000;
+          }
+
+          if (alarmValue && currentDistance <= alarmValue && !alarmVisible) {
+            console.log("🚨 Distance-based alarm triggered!");
+            setAlarmVisible(true);
+          }
+
+        } else if (alarmType === 'time') {
+          // Convert ETA to total minutes
+          const timeParts = data.eta.match(/\d+/g);
+          if (timeParts) {
+            if (data.eta.includes('hour')) {
+              currentETA = (parseInt(timeParts[0], 10) * 60) + (parseInt(timeParts[1] || '0', 10));
+            } else {
+              currentETA = parseInt(timeParts[0], 10);
+            }
+          }
+
+          if (alarmValue && currentETA <= alarmValue && !alarmVisible) {
+            console.log("🚨 Time-based alarm triggered!");
+            setAlarmVisible(true);
+          }
     
-        console.log("🕒 Updated ETA:", data.eta);
-        console.log("Updated Distance:", data.distance);
-        setETA(data.eta);
 
-      }
-
-      if(selectedMode == "bycycling") {
-
-        const response = await fetch(
-          `http://155.4.245.117:8000/api/etabike?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
-        );
-        const data = await response.json();
-
-        if (data.error) {
-          console.error("❌ Error fetching ETA:", data.error);
-          return;
         }
-    
-        console.log("🕒 Updated ETA:", data.eta);
-        console.log("Updated Distance:", data.distance);
-        setETA(data.eta);
       }
+        if(selectedMode == "walking") {
+          const response = await fetch(
+            `http://155.4.245.117:8000/api/etawalk?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          );
+          const data = await response.json();
 
-      if(selectedMode == "transit") {
-        const response = await fetch(
-          `http://155.4.245.117:8000/api/etatransit?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
-        );
-        const data = await response.json();
-
-        if (data.error) {
-          console.error("❌ Error fetching ETA:", data.error);
-          return;
-        }
-    
-        console.log("🕒 Updated ETA:", data.eta);
-        console.log("Updated Distance:", data.distance);
-        setETA(data.eta);
-      }
-
-  
+          if (data.error) {
+            console.error("❌ Error fetching ETA:", data.error);
+            return;
+          }
       
+          console.log("🕒 Updated ETA:", data.eta);
+          console.log("Updated Distance:", data.distance);
+          setETA(data.eta);
 
-    } 
-    catch (error) {
-      console.log("❌ Error fetching current location or ETA:", error);
-    }
-  };
+        }
+
+        if(selectedMode == "bycycling") {
+
+          const response = await fetch(
+            `http://155.4.245.117:8000/api/etabike?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          );
+          const data = await response.json();
+
+          if (data.error) {
+            console.error("❌ Error fetching ETA:", data.error);
+            return;
+          }
+      
+          console.log("🕒 Updated ETA:", data.eta);
+          console.log("Updated Distance:", data.distance);
+          setETA(data.eta);
+        }
+
+        if(selectedMode == "transit") {
+          const response = await fetch(
+            `http://155.4.245.117:8000/api/etatransit?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          );
+          const data = await response.json();
+
+          if (data.error) {
+            console.error("❌ Error fetching ETA:", data.error);
+            return;
+          }
+      
+          console.log("🕒 Updated ETA:", data.eta);
+          console.log("Updated Distance:", data.distance);
+          setETA(data.eta);
+        }
+
+    
+        
+
+      } 
+      catch (error) {
+        console.log("❌ Error fetching current location or ETA:", error);
+      }
+    };
   
   
 
@@ -238,10 +303,8 @@ useEffect(() => {
   }, [route.params?.trip]);
 
   useEffect(() => {
-    if(origin && destination && selectedMode) {
     fetchOSRMRoute();
-    }
-  }, [origin, destination, selectedMode]);
+  }, [origin, destination]);
 
   useEffect(() => {
     if (isActiveTrip) {
@@ -250,132 +313,187 @@ useEffect(() => {
     }
   }, [isActiveTrip]);
   // ✅ Fetch route from OSRM
-  // const fetchOSRMRoute = async () => {
-  //   if (origin !== null && destination !== null) {
-  //     const url = `${OSRM_API_URL}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
-  //     try {
-  //       const response = await fetch(url);
-  //       const data = await response.json();
-
-  //       if (data.routes.length > 0) {
-  //         const points: [number, number][] = polyline.decode(data.routes[0].geometry);
-  //         const routeCoords = points.map(([lat, lng]) => ({ latitude: lat, longitude: lng }));
-  //         setRouteCoordinates(routeCoords);
-
-  //         if (mapRef.current) {
-  //           mapRef.current.fitToCoordinates(routeCoords, {
-  //             edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-  //             animated: true,
-  //           });
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("❌ Error fetching OSRM route:", error);
-  //     }
-  //   }
-  // };
   const fetchOSRMRoute = async () => {
-    if (origin !== null && destination !== null && selectedMode) {
-      // Dynamically adjust the OSRM profile based on the selected mode
-      let profile = 'driving'; // default
-  
-      if (selectedMode === 'walking') profile = 'foot';
-      if (selectedMode === 'bicycling') profile = 'bike';
-      if (selectedMode === 'driving') profile = 'driving';
-  
-      const url = `https://router.project-osrm.org/route/v1/${profile}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
-      // const url = `${OSRM_API_URL}/${profile}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
+    if (origin !== null && destination !== null) {
+      const url = `${OSRM_API_URL}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=polyline`;
       try {
         const response = await fetch(url);
         const data = await response.json();
-  
-        if (data.routes && data.routes.length > 0) {
-          const points = polyline.decode(data.routes[0].geometry);
-          const routeCoords = points.map(([lat, lng]) => ({ latitude: lat, longitude: lng,}));
+
+        if (data.routes.length > 0) {
+          const points: [number, number][] = polyline.decode(data.routes[0].geometry);
+          const routeCoords = points.map(([lat, lng]) => ({ latitude: lat, longitude: lng }));
           setRouteCoordinates(routeCoords);
-  
+
           if (mapRef.current) {
             mapRef.current.fitToCoordinates(routeCoords, {
               edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
               animated: true,
             });
           }
-  
-          console.log(`✅ Route loaded for mode: ${selectedMode}`);
-        } else {
-          console.error(`❌ No route found for mode: ${selectedMode}`);
         }
       } catch (error) {
         console.error("❌ Error fetching OSRM route:", error);
       }
     }
   };
-  
   return (
-    <View style={styles.container}>
-      {userLocation && (
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          initialRegion={{
-            latitude: userLocation.latitude,
-            longitude: userLocation.longitude,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}
-          showsUserLocation
-        >
-          {origin && destination && (
-            <>
-              <Marker coordinate={origin} title="Start" />
-              <Marker coordinate={destination} title="Destination" />
-            </>
-          )}
-
-          {routeCoordinates.length > 0 && (
-            <Polyline coordinates={routeCoordinates} strokeWidth={4} strokeColor="blue" />
-          )}
-        </MapView>
-      )}
-
-      <View style={styles.mapBottomBar}>
-        {!isActiveTrip && !showDropdown && (
-          <TouchableOpacity onPress={() => setShowDropdown(true)} style={styles.buttonStartTrip}>
-            <Text style={styles.buttonStartTripText}>Start Trip</Text>
-          </TouchableOpacity>
+    <>
+      <View style={styles.container}>
+        {userLocation && (
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            initialRegion={{
+              latitude: userLocation.latitude,
+              longitude: userLocation.longitude,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.05,
+            }}
+            showsUserLocation
+          >
+            {origin && destination && (
+              <>
+                <Marker coordinate={origin} title="Start" />
+                <Marker coordinate={destination} title="Destination" />
+              </>
+            )}
+  
+            {routeCoordinates.length > 0 && (
+              <Polyline coordinates={routeCoordinates} strokeWidth={4} strokeColor="blue" />
+            )}
+          </MapView>
         )}
-
-        {showDropdown && (
-          <View>
-            <Picker
-              selectedValue={selectedMode}
-              onValueChange={(itemValue) => setSelectedMode(itemValue)}
-              style={styles.picker}
+  
+        <View style={styles.mapBottomBar}>
+          {!isActiveTrip && !showDropdown && (
+            <TouchableOpacity
+              onPress={() => setShowDropdown(true)}
+              style={styles.buttonStartTrip}
             >
-              <Picker.Item label="Select Mode" value="" />
-              <Picker.Item label="Car" value="driving" />
-              <Picker.Item label="Walk" value="walking" />
-              <Picker.Item label="Bike" value="bicycling" />
-              <Picker.Item label="Transit" value="transit" />
-            </Picker>
-            <TouchableOpacity onPress={startTrip} style={styles.buttonStartTrip}>
-              <Text style={styles.buttonStartTripText}>Confirm Mode & Start Trip</Text>
+              <Text style={styles.buttonStartTripText}>Start Trip</Text>
+            </TouchableOpacity>
+          )}
+  
+          {showDropdown && (
+            <View>
+              <Picker
+                selectedValue={selectedMode}
+                onValueChange={(itemValue) => setSelectedMode(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select Mode" value="" />
+                <Picker.Item label="Car" value="driving" />
+                <Picker.Item label="Walk" value="walking" />
+                <Picker.Item label="Bike" value="bicycling" />
+                <Picker.Item label="Transit" value="transit" />
+              </Picker>
+              <TouchableOpacity onPress={startTrip} style={styles.buttonStartTrip}>
+                <Text style={styles.buttonStartTripText}>Confirm Mode & Start Trip</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+  
+          {isActiveTrip && (
+            <TouchableOpacity onPress={stopTrip} style={styles.buttonStartTrip}>
+              <Text style={styles.buttonStartTripText}>Stop Trip</Text>
+            </TouchableOpacity>
+          )}
+  
+          <Text style={styles.ETA}>
+            {estimatedTimeArrival ? "ETA: " + estimatedTimeArrival : "ETA: Not Available"}
+          </Text>
+        </View>
+  
+        {isActiveTrip && <ETAUpdater setETA={setETA} />}
+      </View>
+  
+      {/* ✅ Modal placed outside of main View */}
+      <Modal visible={alarmVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.title}>🚨 Alarm Triggered! 🚨</Text>
+            <Text style={styles.subtitle}>Your selected alarm is playing.</Text>
+  
+            <TouchableOpacity
+              style={styles.stopButton}
+              onPress={() => setAlarmVisible(false)}
+            >
+              <Text style={styles.stopButtonText}>Stop Alarm</Text>
             </TouchableOpacity>
           </View>
-        )}
-
-        {isActiveTrip && (
-          <TouchableOpacity onPress={stopTrip} style={styles.buttonStartTrip}>
-            <Text style={styles.buttonStartTripText}>Stop Trip</Text>
-          </TouchableOpacity>
-        )}
-
-        <Text style={styles.ETA}>{estimatedTimeArrival ? 'ETA: ' + estimatedTimeArrival : 'ETA: Not Available'}</Text>
-      </View>
-
-      {isActiveTrip && <ETAUpdater setETA={setETA} />}
-    </View>
+        </View>
+      </Modal>
+    </>
   );
+  // return (
+  //   <View style={styles.container}>
+  //     {userLocation && (
+  //       <MapView
+  //         ref={mapRef}
+  //         style={styles.map}
+  //         initialRegion={{
+  //           latitude: userLocation.latitude,
+  //           longitude: userLocation.longitude,
+  //           latitudeDelta: 0.05,
+  //           longitudeDelta: 0.05,
+  //         }}
+  //         showsUserLocation
+  //       >
+  //         {origin && destination && (
+  //           <>
+  //             <Marker coordinate={origin} title="Start" />
+  //             <Marker coordinate={destination} title="Destination" />
+  //           </>
+  //         )}
+
+  //         {routeCoordinates.length > 0 && (
+  //           <Polyline coordinates={routeCoordinates} strokeWidth={4} strokeColor="blue" />
+  //         )}
+  //       </MapView>
+  //     )}
+
+  //     <View style={styles.mapBottomBar}>
+  //       {!isActiveTrip && !showDropdown && (
+  //         <TouchableOpacity onPress={() => setShowDropdown(true)} style={styles.buttonStartTrip}>
+  //           <Text style={styles.buttonStartTripText}>Start Trip</Text>
+  //         </TouchableOpacity>
+  //       )}
+
+  //       {showDropdown && (
+  //         <View>
+  //           <Picker
+  //             selectedValue={selectedMode}
+  //             onValueChange={(itemValue) => setSelectedMode(itemValue)}
+  //             style={styles.picker}
+  //           >
+  //             <Picker.Item label="Select Mode" value="" />
+  //             <Picker.Item label="Car" value="driving" />
+  //             <Picker.Item label="Walk" value="walking" />
+  //             <Picker.Item label="Bike" value="bicycling" />
+  //             <Picker.Item label="Transit" value="transit" />
+  //           </Picker>
+  //           <TouchableOpacity onPress={startTrip} style={styles.buttonStartTrip}>
+  //             <Text style={styles.buttonStartTripText}>Confirm Mode & Start Trip</Text>
+  //           </TouchableOpacity>
+  //         </View>
+  //       )}
+
+  //       {isActiveTrip && (
+  //         <TouchableOpacity onPress={stopTrip} style={styles.buttonStartTrip}>
+  //           <Text style={styles.buttonStartTripText}>Stop Trip</Text>
+  //         </TouchableOpacity>
+  //       )}
+
+  //       <Text style={styles.ETA}>{estimatedTimeArrival ? 'ETA: ' + estimatedTimeArrival : 'ETA: Not Available'}</Text>
+  //     </View>
+      
+
+
+  //     {isActiveTrip && <ETAUpdater setETA={setETA} />}
+  //   </View>
+
+  // );
 }
 
 export default MapComponent;
@@ -409,9 +527,57 @@ const styles = StyleSheet.create({
     backgroundColor: 'blue',
     color: 'white',
   },
+
+  // ✅ Modal Specific Styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background for overlay
+    zIndex: 1000, // Ensures modal is above all other content
+    elevation: 10, // For Android layering
+  },
+  modalContent: {
+    width: "85%",
+    padding: 25,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 15, // Ensures it renders above the overlay on Android
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "red",
+    marginBottom: 15,
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  stopButton: {
+    backgroundColor: "#ff4444",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+  },
+  stopButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });
 
 
+
+
+
+/////////////////////OLD STUFF//////////////////////////////////////////
 
 //   return (
 //     <View style={styles.container}>
