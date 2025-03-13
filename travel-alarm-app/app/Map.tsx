@@ -10,6 +10,7 @@ import { selectionAsync } from "expo-haptics";
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
+import TriggerAlarm from './TriggerAlarm';
 
 
 
@@ -619,23 +620,6 @@ useEffect(() => {
         </MapView>
       )}
 
-      {/* Alarm Overlay */}
-      {alarmVisible && (
-        <View style={styles.alarmOverlay}>
-          <View style={styles.alarmContent}>
-            <Text style={styles.title}>🚨 Alarm Triggered! 🚨</Text>
-            <Text style={styles.subtitle}>Your selected alarm is playing.</Text>
-
-            <TouchableOpacity
-              style={styles.stopButton}
-              onPress={() => setAlarmVisible(false)}
-            >
-              <Text style={styles.stopButtonText}>Stop Alarm</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
       <View style={styles.mapBottomBar}>
         {!isActiveTrip && !showDropdown && (
           <TouchableOpacity onPress={() => setShowDropdown(true)} style={styles.buttonStartTrip}>
@@ -671,7 +655,7 @@ useEffect(() => {
         <Text style={styles.ETA}>{estimatedTimeArrival ? 'ETA: ' + estimatedTimeArrival : 'ETA: Not Available'}</Text>
       </View>
       
-
+      <TriggerAlarm visible={alarmVisible} onClose={() => setAlarmVisible(false)} />
 
       {isActiveTrip && <ETAUpdater setETA={setETA} />}
     </View>
@@ -709,48 +693,6 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'blue',
     color: 'white',
-  },
-
-   // Alarm overlay styles
-  alarmOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  alarmContent: {
-    width: "80%",
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
-    alignItems: "center",
-    elevation: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "red",
-    marginBottom: 15,
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  stopButton: {
-    backgroundColor: "#ff4444",
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 8,
-  },
-  stopButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
 

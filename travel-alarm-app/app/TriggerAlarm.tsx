@@ -19,7 +19,7 @@ const TriggerAlarm: React.FC<TriggerAlarmProps> = ({ visible, onClose }) => {
   const [alarmSound, setAlarmSound] = useState<Audio.Sound | null>(null);
   const [selectedAlarmId, setSelectedAlarmId] = useState<number | null>(null);
 
-  // Fetch the user's selected alarm sound **each time modal opens**
+  // Fetch the user's selected alarm sound each time modal opens
   useEffect(() => {
     const fetchAlarm = async () => {
       const userId = await AsyncStorage.getItem('selectedUser');
@@ -28,12 +28,17 @@ const TriggerAlarm: React.FC<TriggerAlarmProps> = ({ visible, onClose }) => {
       try {
         const response = await fetch(`http://155.4.245.117:8000/api/alarm/${userId}`);
         const data = await response.json();
+
         if (data.Alarm_ID) {
-          console.log("Fetched Alarm ID:", data.Alarm_ID);
+          console.log('Fetched Alarm ID:', data.Alarm_ID);
           setSelectedAlarmId(data.Alarm_ID);
+        } else {
+          console.warn('⚠️ No valid Alarm_ID in DB; falling back to ID=1');
+          setSelectedAlarmId(1); // fallback
         }
       } catch (error) {
         console.error('Error fetching alarm:', error);
+        setSelectedAlarmId(1); // fallback if fetch fails
       }
     };
 
@@ -45,13 +50,18 @@ const TriggerAlarm: React.FC<TriggerAlarmProps> = ({ visible, onClose }) => {
   // Play the alarm sound in a loop when modal is visible
   useEffect(() => {
     let isMounted = true;
-    
+
     const playAlarm = async () => {
-      if (!selectedAlarmId || !alarmSounds[selectedAlarmId]) return;
+      if (!selectedAlarmId) {
+        console.warn('⚠️ No selectedAlarmId, cannot play sound.');
+        return;
+      }
+      // If ID is out of range, fallback to ID=1
+      const alarmFile = alarmSounds[selectedAlarmId] ?? alarmSounds[1];
 
       try {
-        console.log("Playing alarm sound...");
-        const { sound } = await Audio.Sound.createAsync(alarmSounds[selectedAlarmId], { isLooping: true });
+        console.log(`Playing alarm sound for Alarm ID=${selectedAlarmId}...`);
+        const { sound } = await Audio.Sound.createAsync(alarmFile, { isLooping: true });
 
         if (isMounted) {
           setAlarmSound(sound);
@@ -68,21 +78,21 @@ const TriggerAlarm: React.FC<TriggerAlarmProps> = ({ visible, onClose }) => {
 
     return () => {
       isMounted = false;
-      stopAlarm(false); // Do NOT close modal automatically when unmounting
+      stopAlarm(false); // do NOT close modal automatically
     };
   }, [visible, selectedAlarmId]);
 
-  // Stop the alarm **only when "Stop Alarm" is pressed**
+  // Stop the alarm
   const stopAlarm = async (closeModal: boolean = true) => {
     if (alarmSound) {
-      console.log("Stopping alarm...");
+      console.log('Stopping alarm...');
       await alarmSound.stopAsync();
       await alarmSound.unloadAsync();
       setAlarmSound(null);
     }
 
     if (closeModal) {
-      onClose(); // Only close the modal when explicitly stopping
+      onClose(); // only close the modal if explicitly asked
     }
   };
 
