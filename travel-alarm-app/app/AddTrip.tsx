@@ -121,8 +121,9 @@ const AddTrip = () => {
 
           resolve();
         })
-        let startCoordString = ""
+        let startCoordString = startCoord
         if (startCoord.length == 0) {
+          console.log(startPoint)
           const responseGet = await axios.get('http://155.4.245.117:8000/api/distance', {
             params: {
                 origins: startPoint,
@@ -138,8 +139,10 @@ const AddTrip = () => {
           
 
           console.log("INSERTING LOC: ", startCoordString, startPoint)
+          let label = startPoint
+          let value = startCoordString
           const response = await axios.post('http://155.4.245.117:8000/api/addLocation', 
-            { startPoint, startCoordString})
+            { label, value})
             .then(response => {
               console.log("Success", response)
             })
@@ -148,8 +151,9 @@ const AddTrip = () => {
             })
         }
 
-        let endCoordString = ""
+        let endCoordString = endCoord
         if (endCoord.length == 0) {
+
           const responseGet = await axios.get('http://155.4.245.117:8000/api/distance', {
             params: {
                 origins: endPoint,
@@ -163,8 +167,10 @@ const AddTrip = () => {
           setEndCoord(endCoordString)
 
           console.log("INSERTING LOC: ", endPoint, endCoordString)
+          let label = endPoint
+          let value = endCoordString
           const response = await axios.post('http://155.4.245.117:8000/api/addLocation', 
-            { endPoint, endCoordString})
+            { label, value })
             .then(response => {
               console.log("Success", response)
             })
@@ -174,16 +180,16 @@ const AddTrip = () => {
             
         }
 
-        console.log(startCoord, endCoord)
+        console.log(startCoordString, endCoordString)
 
-        // const response = await axios.post('http://155.4.245.117:8000/api/addtrip', 
-        //   { Alarm_ID: 0, User_ID: 1, Start: startCoord, End: endCoord, ETA: ""})
-        // .then(response => {
-        //   console.log("Success", response)
-        // })
-        // .catch(error => {
-        //   console.log("Error posting trip - ", error)
-        // })
+        const response = await axios.post('http://155.4.245.117:8000/api/addtrip', 
+          { Alarm_ID: 0, User_ID: 1, Start: startCoordString, End: endCoordString, ETA: ""})
+        .then(response => {
+          console.log("Success", response)
+        })
+        .catch(error => {
+          console.log("Error posting trip - ", error)
+        })
         
     }
 
