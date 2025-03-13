@@ -413,17 +413,51 @@ useEffect(() => {
 
 
 
+
   useEffect(() => {
+    let locationSubscription: Location.LocationSubscription | undefined;
+
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         console.error("❌ Permission to access location was denied");
         return;
       }
+      // Get initial location once
       let currentLocation = await Location.getCurrentPositionAsync({});
       setUserLocation(currentLocation.coords);
+
+      // ADDED: Start watching the user's location
+      locationSubscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 30,    // Update at least every 1 second
+          distanceInterval: 0,   // Or anytime the user moves
+        },
+        (loc) => {
+          setUserLocation(loc.coords);
+        }
+      );
     })();
+
+    // Cleanup when component unmounts
+    return () => {
+      if (locationSubscription) {
+        locationSubscription.remove();
+      }
+    };
   }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== "granted") {
+  //       console.error("Permission to access location was denied");
+  //       return;
+  //     }
+  //     let currentLocation = await Location.getCurrentPositionAsync({});
+  //     setUserLocation(currentLocation.coords);
+  //   })();
+  // }, []);
 
   useEffect(() => {
     if (route.params?.trip) {
