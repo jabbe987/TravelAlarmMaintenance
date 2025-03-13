@@ -56,7 +56,7 @@ const DropDown = () => {
         console.error('General error:', error.message);
       }
   });
-  }, [])
+  })
 
   useEffect(() => {
     axios.get('http://155.4.245.117:8000/api/trips')

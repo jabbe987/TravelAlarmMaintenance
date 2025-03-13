@@ -106,23 +106,19 @@ const AddTrip = () => {
 
     const handleSubmit = async () => {
         //TODO:  CREATE USER CONTEXT TO USE ID ALL OVER APPLICATION, USE DISTANCE ROUTER TO CALCULATE ETA
-        console.log(startPoint, endPoint, locations);
-        await new Promise<void>((resolve) => {
-          locations.map((loc) => {
-            console.log(loc.label, startPoint)
-            if (startPoint == loc.label) {
-              setStartCoord(loc.value);
-              resolve();
-            } else if (endPoint == loc.label) {
-              setEndCoord(loc.value);
-              resolve();
-            }
-          })
-
-          resolve();
+        let startCoordString = ""
+        let endCoordString = ""
+        locations.map((loc) => {
+          if (startPoint == loc.label) {
+            startCoordString = loc.value;
+          } else if (endPoint == loc.label) {
+            console.log(loc.label, endPoint)
+            endCoordString = loc.value;
+          }
         })
-        let startCoordString = startCoord
-        if (startCoord.length == 0) {
+  
+
+        if (startCoordString.length == 0) {
           console.log(startPoint)
           const responseGet = await axios.get('http://155.4.245.117:8000/api/distance', {
             params: {
@@ -151,8 +147,7 @@ const AddTrip = () => {
             })
         }
 
-        let endCoordString = endCoord
-        if (endCoord.length == 0) {
+        if (endCoordString.length == 0) {
 
           const responseGet = await axios.get('http://155.4.245.117:8000/api/distance', {
             params: {
@@ -179,8 +174,6 @@ const AddTrip = () => {
             })
             
         }
-
-        console.log(startCoordString, endCoordString)
 
         const response = await axios.post('http://155.4.245.117:8000/api/addtrip', 
           { Alarm_ID: 0, User_ID: 1, Start: startCoordString, End: endCoordString, ETA: ""})
