@@ -24,16 +24,16 @@ app.use(express.json());
 // });
 
 // ✅ Use connection pooling
-const db = mysql.createPool({
-    host: process.env.DB_HOST,  // Your friend's server IP
-    user: process.env.DB_USER,  // MySQL username
-    password: process.env.DB_PASS,  // MySQL password
-    database: process.env.DB_NAME, // Your database name
-    port: process.env.DB_PORT,
-    waitForConnections: true,
-    connectionLimit: 10,  // Max number of connections
-    queueLimit: 0
-}).promise(); // 👈 Using promise-based API
+// const db = mysql.createPool({
+//     host: process.env.DB_HOST,  // Your friend's server IP
+//     user: process.env.DB_USER,  // MySQL username
+//     password: process.env.DB_PASS,  // MySQL password
+//     database: process.env.DB_NAME, // Your database name
+//     port: process.env.DB_PORT,
+//     waitForConnections: true,
+//     connectionLimit: 10,  // Max number of connections
+//     queueLimit: 0
+// }).promise(); // 👈 Using promise-based API
 
 // db.connect(err => {
 //     if (err) {
@@ -81,12 +81,19 @@ app.use('/api', fetchGoogleEta)
 // ✅ API Route to Fetch Words
 app.get('/api/words', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM words');
-        res.json(rows);
+        console.log("inside fetch words"); 
+        res.json({ message: "Hello from server", words: ["foo", "bar", "baz"] });
     } catch (error) {
-        console.error('Error fetching words:', error);
-        res.status(500).json({ error: 'Database query error' });
+        console.error("Error1 fetching words:", error);
+        res.status(500).json({ error: "Server error" });
     }
+    // try {
+    //     const [rows] = await db.query('SELECT * FROM words');
+    //     res.json(rows);
+    // } catch (error) {
+    //     console.error('Error fetching words:', error);
+    //     res.status(500).json({ error: 'Database query error' });
+    // }
 });
 
 // ✅ API Route to Fetch Users
@@ -105,7 +112,12 @@ app.get('/api/config', (req, res) => {
 });
 
 
+// const PORT = process.env.PORT || 8000;
+// app.listen(PORT, () => {
+//     console.log(`Server is running on port ${PORT}`);
+// });
+
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Server is running on http://0.0.0.0:${PORT}`);
 });

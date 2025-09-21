@@ -15,7 +15,7 @@ const DistanceView: React.FC = () => {
             return;
         }
 
-        axios.get('http://155.4.245.117:8000/api/distance', {
+        axios.get('http://10.82.133.250:8000/api/distance', {
             params: {
                 origins: origin,
                 destinations: destination

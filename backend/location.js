@@ -4,13 +4,22 @@ const mysql = require('mysql2');
 
 const router = express.Router(); 
 
-const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT
-});
+// const db = mysql.createConnection({
+//     host: process.env.DB_HOST,
+//     user: process.env.DB_USER,
+//     password: process.env.DB_PASS,
+//     database: process.env.DB_NAME,
+//     port: process.env.DB_PORT
+// });
+
+const db = {
+  promise: () => ({
+    query: async (sql) => {
+      console.log("⚠️ Dummy DB query intercepted:", sql);
+      return [[{ Active_trip: false }]]; // returnera "låtsas-data"
+    }
+  })
+};
 
 // Get all locations
 router.get('/locations', (req, res) => {

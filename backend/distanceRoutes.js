@@ -9,6 +9,7 @@ const GOOGLE_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 const getCoordinates = async (address) => {
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_API_KEY}`;
     const response = await axios.get(url);
+    // console.log("Response:", response); 
 
     if (response.data.status !== 'OK') {
         throw new Error(`Failed to get coordinates for ${address}: ${response.data.status}`);

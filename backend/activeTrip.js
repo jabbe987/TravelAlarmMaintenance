@@ -4,26 +4,35 @@ const router = express.Router();
 const mysql = require('mysql2');
 
 // ✅ Use connection pool for better performance
-const db = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
-    waitForConnections: true,
-    connectionLimit: 10,  // ✅ Adjust if needed
-    queueLimit: 0
-});
+// const db = mysql.createPool({
+//     host: process.env.DB_HOST,
+//     user: process.env.DB_USER,
+//     password: process.env.DB_PASS,
+//     database: process.env.DB_NAME,
+//     port: process.env.DB_PORT,
+//     waitForConnections: true,
+//     connectionLimit: 10,  // ✅ Adjust if needed
+//     queueLimit: 0
+// });
+
+const db = {
+  promise: () => ({
+    query: async (sql) => {
+      console.log("⚠️ Dummy DB query intercepted:", sql);
+      return [[{ Active_trip: false }]]; // returnera "låtsas-data"
+    }
+  })
+};
 
 // ✅ Ensure database connection works
-db.getConnection((err, connection) => {
-    if (err) {
-        console.error("❌ Database connection failed:", err);
-    } else {
-        console.log("✅ Database connected successfully!");
-        connection.release(); // ✅ Release connection after checking
-    }
-});
+// db.getConnection((err, connection) => {
+//     if (err) {
+//         console.error("❌ Database connection failed:", err);
+//     } else {
+//         console.log("✅ Database connected successfully!");
+//         connection.release(); // ✅ Release connection after checking
+//     }
+// });
 
 router.get('/active-trip-status', async (req, res) => {
     try {

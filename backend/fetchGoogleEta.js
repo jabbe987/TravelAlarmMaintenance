@@ -1,5 +1,6 @@
 const express = require("express");
-const fetch = require("node-fetch"); // If using Node 18+, use `globalThis.fetch`
+// const fetch = require("node-fetch"); // If using Node 18+, use `globalThis.fetch`
+const fetch = globalThis.fetch;
 require("dotenv").config(); // Load API key from .env file
 
 

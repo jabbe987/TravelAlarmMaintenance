@@ -5,13 +5,22 @@ const mysql = require('mysql2');
 const router = express.Router();  // ✅ Use Router instead of a new Express app
 
 // Database connection
-const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT
-});
+// const db = mysql.createConnection({
+//     host: process.env.DB_HOST,
+//     user: process.env.DB_USER,
+//     password: process.env.DB_PASS,
+//     database: process.env.DB_NAME,
+//     port: process.env.DB_PORT
+// });
+
+const db = {
+  promise: () => ({
+    query: async (sql) => {
+      console.log("⚠️ Dummy DB query intercepted:", sql);
+      return [[{ Active_trip: false }]]; // returnera "låtsas-data"
+    }
+  })
+};
 
 // 🔹 Get user settings (Convert BIT(1) properly)
 router.get('/settings/:userId', (req, res) => {
