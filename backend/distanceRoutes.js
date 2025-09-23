@@ -9,7 +9,7 @@ const GOOGLE_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 const getCoordinates = async (address) => {
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_API_KEY}`;
     const response = await axios.get(url);
-    // console.log("Response:", response); 
+    console.log("response", response); 
 
     if (response.data.status !== 'OK') {
         throw new Error(`Failed to get coordinates for ${address}: ${response.data.status}`);
@@ -58,12 +58,13 @@ router.get('/distance', async (req, res) => {
         const duration = elements.duration.text;
 
         // Send coordinates, distance, and duration in the response
-        res.json({
-            origin: originCoords,
-            destination: destinationCoords,
-            distance,
-            duration,
-        });
+        // res.json({
+        //     origin: originCoords,
+        //     destination: destinationCoords,
+        //     distance,
+        //     duration,
+        // });
+        res.json(distanceResponse.data);
 
     } catch (error) {
         console.error("Error fetching data:", error.message);

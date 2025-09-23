@@ -32,6 +32,7 @@ const DistanceView: React.FC = () => {
                 setError('Could not calculate distance. Try different locations.');
             }
         })
+        
         .catch(error => {
             console.error('Error fetching distance:', error);
             setError('Failed to fetch distance. Please try again later.');
