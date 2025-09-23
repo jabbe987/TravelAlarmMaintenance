@@ -1,0 +1,4 @@
+DELETE FROM Trip;
+DELETE FROM User;
+DELETE FROM Alarm;
+DELETE FROM Location;
