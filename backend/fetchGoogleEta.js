@@ -1,7 +1,30 @@
-const express = require("express");
-// const fetch = require("node-fetch"); // If using Node 18+, use `globalThis.fetch`
+import express from "express";
+import dotenv from "dotenv";
+
+import sqlite3 from "sqlite3";
+
+import { fileURLToPath } from "url";
+import path from "path";
+
+// Resolve __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Use DB_PATH from .env or fallback
+const dbPath = process.env.DB_PATH || path.join(__dirname, "travelAlarm.db");
+
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error("❌ Could not connect to database:", err.message);
+  } else {
+    console.log(`✅ Connected to SQLite database at ${dbPath}`);
+  }
+});
+
+// If using Node 18+, fetch is already available globally
 const fetch = globalThis.fetch;
-require("dotenv").config(); // Load API key from .env file
+
+dotenv.config();
 
 
 const router = express.Router();
@@ -189,4 +212,4 @@ router.get('/etatransit', async (req, res) => {
 });
 
 
-module.exports = router;
+export default router;

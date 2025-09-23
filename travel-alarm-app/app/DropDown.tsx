@@ -38,7 +38,7 @@ const DropDown = () => {
   };
 
   useEffect(() => {
-    axios.get('http://155.4.245.117:8000/api/locations')
+    axios.get('http://localhost:8000/api/locations')
     .then(response => {
       const formattedLocations = response.data.map((loc: { Name: string; Coordinates: string; }) => ({
         label: loc.Name, 
@@ -59,8 +59,10 @@ const DropDown = () => {
   })
 
   useEffect(() => {
-    axios.get('http://155.4.245.117:8000/api/trips')
+    console.log("SETTING TRIPS")
+    axios.get('http://localhost:8000/api/trips')
           .then(response => {
+            console.log("SETTING TRIPS", response)
             setTrips(response.data);
           })
           .catch(error => {

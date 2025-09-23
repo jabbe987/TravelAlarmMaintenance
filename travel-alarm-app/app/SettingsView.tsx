@@ -44,7 +44,7 @@ export default function SettingsView() {
         const userId = await AsyncStorage.getItem('selectedUser');
         if (!userId) return;
 
-        const response = await fetch(`http://155.4.245.117:8000/api/settings/${userId}`);
+        const response = await fetch(`http://localhost:8000/api/settings/${userId}`);
         if (!response.ok) throw new Error('Failed to fetch user settings');
 
         const data = await response.json();
@@ -114,7 +114,7 @@ export default function SettingsView() {
     if (!userId) return;
 
     try {
-      const response = await fetch('http://155.4.245.117:8000/api/alarm', {
+      const response = await fetch('http://localhost:8000/api/alarm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, alarmId: tempSelectedAlarm }),
@@ -145,7 +145,7 @@ export default function SettingsView() {
       const alarmValue = alarmType === 'distance' ? distance : time;
       const alarmTypeBit = alarmType === 'distance' ? 0 : 1;
 
-      const response = await fetch('http://155.4.245.117:8000/api/settings', {
+      const response = await fetch('http://localhost:8000/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

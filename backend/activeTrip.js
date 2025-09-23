@@ -1,38 +1,30 @@
-require('dotenv').config();
-const express = require('express');
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+
+import sqlite3 from "sqlite3";
+
+import { fileURLToPath } from "url";
+import path from "path";
+
+// Resolve __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Use DB_PATH from .env or fallback
+const dbPath = process.env.DB_PATH || path.join(__dirname, "travelAlarm.db");
+
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error("❌ Could not connect to database:", err.message);
+  } else {
+    console.log(`✅ Connected to SQLite database at ${dbPath}`);
+  }
+});
+
+
 const router = express.Router();
-const mysql = require('mysql2');
-
-// ✅ Use connection pool for better performance
-// const db = mysql.createPool({
-//     host: process.env.DB_HOST,
-//     user: process.env.DB_USER,
-//     password: process.env.DB_PASS,
-//     database: process.env.DB_NAME,
-//     port: process.env.DB_PORT,
-//     waitForConnections: true,
-//     connectionLimit: 10,  // ✅ Adjust if needed
-//     queueLimit: 0
-// });
-
-const db = {
-  promise: () => ({
-    query: async (sql) => {
-      console.log("⚠️ Dummy DB query intercepted:", sql);
-      return [[{ Active_trip: false }]]; // returnera "låtsas-data"
-    }
-  })
-};
-
-// ✅ Ensure database connection works
-// db.getConnection((err, connection) => {
-//     if (err) {
-//         console.error("❌ Database connection failed:", err);
-//     } else {
-//         console.log("✅ Database connected successfully!");
-//         connection.release(); // ✅ Release connection after checking
-//     }
-// });
 
 router.get('/active-trip-status', async (req, res) => {
     try {
@@ -60,4 +52,4 @@ router.get('/active-trip-status', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

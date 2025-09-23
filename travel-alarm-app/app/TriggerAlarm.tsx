@@ -26,7 +26,7 @@ const TriggerAlarm: React.FC<TriggerAlarmProps> = ({ visible, onClose }) => {
       if (!userId) return;
 
       try {
-        const response = await fetch(`http://155.4.245.117:8000/api/alarm/${userId}`);
+        const response = await fetch(`http://localhost:8000/api/alarm/${userId}`);
         const data = await response.json();
 
         if (data.Alarm_ID) {

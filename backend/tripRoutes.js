@@ -1,8 +1,28 @@
-require('dotenv').config();
-const express = require('express');
-const mysql = require('mysql2');
+import dotenv from "dotenv";
+dotenv.config();
 
-const router = express.Router();  // ✅ Use Router instead of a new Express app
+import express from "express";
+import sqlite3 from "sqlite3";
+
+import { fileURLToPath } from "url";
+import path from "path";
+
+// Resolve __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Use DB_PATH from .env or fallback
+const dbPath = process.env.DB_PATH || path.join(__dirname, "travelAlarm.db");
+
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error("❌ Could not connect to database:", err.message);
+  } else {
+    console.log(`✅ Connected to SQLite database at ${dbPath}`);
+  }
+});
+
+const router = express.Router();
 
 // Database connection
 // const db = mysql.createConnection({
@@ -12,15 +32,6 @@ const router = express.Router();  // ✅ Use Router instead of a new Express app
 //     database: process.env.DB_NAME,
 //     port: process.env.DB_PORT
 // });
-
-const db = {
-  promise: () => ({
-    query: async (sql) => {
-      console.log("⚠️ Dummy DB query intercepted:", sql);
-      return [[{ Active_trip: false }]]; // returnera "låtsas-data"
-    }
-  })
-};
 
 // List all trips
 router.get('/trips', (req, res) => {
@@ -131,4 +142,4 @@ router.put('/alarms/dismiss/:id', (req, res) => {
     );
 });
 
-module.exports = router; // ✅ Export the router
+export default router;

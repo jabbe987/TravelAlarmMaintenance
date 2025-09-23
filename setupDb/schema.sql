@@ -4,7 +4,7 @@ CREATE TABLE Trip (
     User_ID integer, 
     Start CHAR, 
     End CHAR, 
-    ETA DATE,
+    ETA CHAR,
     FOREIGN KEY(Alarm_ID) REFERENCES Alarm(Alarm_ID),
     FOREIGN KEY(User_ID) REFERENCES User(User_ID)
 );
@@ -18,8 +18,8 @@ CREATE TABLE User (
 CREATE TABLE Alarm (
     Alarm_ID INTEGER PRIMARY KEY AUTOINCREMENT,
     Trip_ID  INTEGER,
-    Alarm_Time DATE,
-    Status CHAR, 
+    Alarm_Time INTEGER,
+    Status INTEGER, 
     FOREIGN KEY(Trip_ID) REFERENCES Trip(Trip_ID)
 );
 

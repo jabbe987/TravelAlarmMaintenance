@@ -1,15 +1,16 @@
+import dotenv from "dotenv";
+dotenv.config();
 
-require('dotenv').config();
-const express = require('express');
-const mysql = require('mysql2');
-const cors = require('cors');
-const tripRoutes = require('./tripRoutes'); 
-const distanceRoutes = require('./distanceRoutes');
-const locations = require('./location')
-const activeTrip = require('./activeTrip');
-const updateEta = require('./updateEta');
-const userSettings = require('./userSettings'); 
-const fetchGoogleEta = require('./fetchGoogleEta')
+import express from "express";
+import cors from "cors";
+
+import tripRoutes from "./tripRoutes.js";
+import distanceRoutes from "./distanceRoutes.js";
+import locations from "./location.js";
+import activeTrip from "./activeTrip.js";
+import updateEta from "./updateEta.js";
+import userSettings from "./userSettings.js";
+import fetchGoogleEta from "./fetchGoogleEta.js";
 
 const app = express();
 app.use(cors());
@@ -118,6 +119,6 @@ app.get('/api/config', (req, res) => {
 // });
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Server is running on http://0.0.0.0:${PORT}`);
+app.listen(PORT, "localhost", () => {
+  console.log(`✅ Server is running on http://localhost:${PORT}`);
 });
