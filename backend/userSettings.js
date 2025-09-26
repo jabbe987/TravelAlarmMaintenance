@@ -38,7 +38,7 @@ const router = express.Router();
 router.get('/settings/:userId', (req, res) => {
     const { userId } = req.params;
 
-    db.query(
+    db.get(
         'SELECT User_ID, CAST(AlarmType AS UNSIGNED) AS AlarmType, AlarmValue FROM User WHERE User_ID = ?',
         [userId],
         (err, results) => {
@@ -63,7 +63,7 @@ router.post('/settings', (req, res) => {
 
     const bitAlarmType = alarmType ? 1 : 0; // Ensure 0 or 1
 
-    db.query(
+    db.run(
         'UPDATE User SET AlarmType = ?, AlarmValue = ? WHERE User_ID = ?',
         [bitAlarmType, alarmValue, userId],
         (err, results) => {
@@ -81,7 +81,7 @@ router.post('/settings', (req, res) => {
 router.get('/alarm/:userId', (req, res) => {
     const { userId } = req.params;
 
-    db.query('SELECT Alarm_ID FROM User WHERE User_ID = ?', [userId], (err, results) => {
+    db.get('SELECT Alarm_ID FROM User WHERE User_ID = ?', [userId], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
 
         if (results.length === 0) {
@@ -99,7 +99,7 @@ router.post('/alarm', (req, res) => {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    db.query('UPDATE User SET Alarm_ID = ? WHERE User_ID = ?', [alarmId, userId], (err, results) => {
+    db.run('UPDATE User SET Alarm_ID = ? WHERE User_ID = ?', [alarmId, userId], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
 
         if (results.affectedRows === 0) {

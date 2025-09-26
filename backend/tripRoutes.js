@@ -36,7 +36,7 @@ const router = express.Router();
 // List all trips
 router.get('/trips', (req, res) => {
     // console.log("LISTING TRIPS LOCALLY")
-    db.query('SELECT * FROM Trip', (err, results) => {
+    db.get('SELECT * FROM Trip', (err, results) => {
         console.log(results)
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
@@ -46,7 +46,7 @@ router.get('/trips', (req, res) => {
 // Get trip details by ID
 router.get('/trips/:id', (req, res) => {
     const tripId = req.params.id;  
-    db.query('SELECT * FROM Trip WHERE Trip_ID = ?', [tripId], (err, results) => {
+    db.get('SELECT * FROM Trip WHERE Trip_ID = ?', [tripId], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) return res.status(404).json({ error: 'Trip not found' });
         res.json(results);
@@ -75,7 +75,7 @@ router.post('/addtrip', (req, res) => {
 
     const parsedETA = parseToMySQLTime(ETA);
     
-    db.query(
+    db.run(
         'INSERT INTO Trip (Alarm_ID, User_ID, Start, End, ETA) VALUES (?, ?, ?, ?, ?)',
         [Alarm_ID || null, User_ID, Start, End, parsedETA],
         (err, results) => {
@@ -92,7 +92,7 @@ router.post('/addtrip', (req, res) => {
 router.put('/trips/start/:id', (req, res) => {
     const tripId = req.params.id;
     const { start_time } = req.body;
-    db.query(
+    db.run(
         'UPDATE trips SET start_time = ? WHERE id = ?',
         [start_time, tripId],
         (err, result) => {
@@ -106,7 +106,7 @@ router.put('/trips/start/:id', (req, res) => {
 router.put('/trips/stop/:id', (req, res) => {
     const tripId = req.params.id;
     const { end_time } = req.body;
-    db.query(
+    db.run(
         'UPDATE trips SET end_time = ? WHERE id = ?',
         [end_time, tripId],
         (err, result) => {
@@ -119,7 +119,7 @@ router.put('/trips/stop/:id', (req, res) => {
 // Set an alarm for a trip
 router.post('/alarms', (req, res) => {
     const { trip_id, alarm_time, status } = req.body;
-    db.query(
+    db.run(
         'INSERT INTO alarms (trip_id, alarm_time, status) VALUES (?, ?, ?)',
         [trip_id, alarm_time, status || 'active'],
         (err, result) => {
@@ -132,7 +132,7 @@ router.post('/alarms', (req, res) => {
 // Dismiss an alarm
 router.put('/alarms/dismiss/:id', (req, res) => {
     const alarmId = req.params.id;
-    db.query(
+    db.run(
         'UPDATE alarms SET status = "dismissed" WHERE id = ?',
         [alarmId],
         (err, result) => {

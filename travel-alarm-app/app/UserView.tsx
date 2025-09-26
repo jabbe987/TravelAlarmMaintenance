@@ -8,7 +8,7 @@ const UserView: React.FC = () => {
 
     // const fetchWords = async () => {
     //     try {
-    //         const response = await axios.get('http://localhost:3000/api/words'); // Replace with your actual backend URL
+    //         const response = await axios.get('http://172.30.98.73:3000/api/words'); // Replace with your actual backend URL
     //         setWords(response.data);
     //     } catch (error) {
     //         console.error('Error fetching words:', error);
@@ -17,9 +17,9 @@ const UserView: React.FC = () => {
     // };
 
     const fetchWords = () => {
-        axios.get('http://10.82.133.250:8000/api/words')  // //http://localhost:3000/api/words
+        axios.get('http://10.82.133.250:8000/api/words')  // //http://172.30.98.73:3000/api/words
 
-        // axios.get('http://localhost:8000/api/words')  // //http://localhost:3000/api/words
+        // axios.get('http://172.30.98.73:8000/api/words')  // //http://172.30.98.73:3000/api/words
 
           .then(response => {
             console.log(response.data); // Log response to debug

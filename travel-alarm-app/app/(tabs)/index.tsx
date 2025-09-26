@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Button, StyleSheet, Platform, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -10,7 +10,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const checkUserSelection = async () => {
-      await AsyncStorage.removeItem("selectedUser");
+      // await AsyncStorage.removeItem("selectedUser");
       setSelectedUser(null);
       setLoading(false);
     };
@@ -18,7 +18,7 @@ export default function HomeScreen() {
   }, []);
 
   const selectUser = async (user: string) => {
-    await AsyncStorage.setItem("selectedUser", user);
+    // await AsyncStorage.setItem("selectedUser", user);
     setSelectedUser(user);
   };
 

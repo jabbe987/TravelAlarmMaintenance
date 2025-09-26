@@ -42,7 +42,7 @@ router.post('/update-eta', async (req, res) => {
 
     try {
         // Get active trip for the user
-        const [trip] = await db.query(
+        const [trip] = await db.get(
             "SELECT Trip_ID, End FROM Trips WHERE User_ID = 1 AND Trip_ID = (SELECT Active_trip FROM User WHERE User_ID = 1)"
         );
 
@@ -72,7 +72,7 @@ router.post('/update-eta', async (req, res) => {
 
 
         // Update ETA in database
-        await db.query("UPDATE Trips SET ETA = ? WHERE Trip_ID = ?", [newETA, trip.Trip_ID]);
+        await db.get("UPDATE Trips SET ETA = ? WHERE Trip_ID = ?", [newETA, trip.Trip_ID]);
 
 
         res.json({ success: true, newETA, isActive: true });

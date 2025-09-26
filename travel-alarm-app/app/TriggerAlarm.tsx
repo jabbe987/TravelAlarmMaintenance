@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, Modal, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 
 // Alarm sound files
@@ -22,11 +22,11 @@ const TriggerAlarm: React.FC<TriggerAlarmProps> = ({ visible, onClose }) => {
   // Fetch the user's selected alarm sound each time modal opens
   useEffect(() => {
     const fetchAlarm = async () => {
-      const userId = await AsyncStorage.getItem('selectedUser');
-      if (!userId) return;
-
+      // const userId = await AsyncStorage.getItem('selectedUser');
+      // if (!userId) return;
+      const userId = 1
       try {
-        const response = await fetch(`http://localhost:8000/api/alarm/${userId}`);
+        const response = await fetch(`http://172.30.98.73:8000/api/alarm/${userId}`);
         const data = await response.json();
 
         if (data.Alarm_ID) {

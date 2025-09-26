@@ -30,8 +30,8 @@ router.get('/active-trip-status', async (req, res) => {
     try {
         console.log("🔍 Fetching active trip from user...");
 
-        // ✅ Use `.promise().query()` to properly handle async/await
-        const [rows] = await db.promise().query("SELECT Active_trip FROM User WHERE User_ID = 1");
+        // ✅ Use `.promise().get()` to properly handle async/await
+        const [rows] = await db.promise().get("SELECT Active_trip FROM User WHERE User_ID = 1");
 
         console.log("✅ Query Result:", rows);
 

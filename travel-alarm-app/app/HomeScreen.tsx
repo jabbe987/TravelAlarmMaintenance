@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = () => {
@@ -9,7 +9,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const storedUser = await AsyncStorage.getItem('selectedUser');
+      // const storedUser = await AsyncStorage.getItem('selectedUser');
       if (storedUser) {
         navigation.replace('MainApp'); // Navigate to the main app if user is selected
       } else {
@@ -20,7 +20,7 @@ const HomeScreen = () => {
   }, []);
 
   const selectUser = async (user: string) => {
-    await AsyncStorage.setItem('selectedUser', user);
+    // await AsyncStorage.setItem('selectedUser', user);
     navigation.replace('MainApp'); // Navigate to the main app
   };
 

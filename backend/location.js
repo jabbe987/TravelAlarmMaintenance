@@ -26,7 +26,7 @@ const router = express.Router();
 
 // Get all locations
 router.get('/locations', (req, res) => {
-    db.query('SELECT * FROM Location', (err, results) => {
+    db.get('SELECT * FROM Location', (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });
@@ -38,7 +38,7 @@ router.post('/addLocation', (req, res) => {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    db.query(
+    db.run(
         'INSERT INTO Location (Name, Coordinates) VALUES (?, ?)',
         [label, value],
         (err, results) => {

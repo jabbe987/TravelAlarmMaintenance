@@ -8,7 +8,7 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import ETAUpdater from "./ETAUpdater"; // ✅ Keeps the ETA updater for active trips
 import { selectionAsync } from "expo-haptics";
 import { Picker } from '@react-native-picker/picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import TriggerAlarm from './TriggerAlarm';
 
@@ -44,7 +44,7 @@ const MapComponent = () => {
   useEffect(() => {
     const fetchApiKey = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/config");
+        const response = await fetch("http://172.30.98.73:8000/api/config");
         const data = await response.json();
         setGoogleApiKey(data.GOOGLE_API_KEY);
         console.log("✅ Google API Key loaded:", data.GOOGLE_API_KEY);
@@ -64,8 +64,9 @@ const MapComponent = () => {
           return;
         }
   
-        const response = await fetch(`http://localhost:8000/api/settings/${userId}`);
+        const response = await fetch(`http://172.30.98.73:8000/api/settings/${userId}`);
         const data = await response.json();
+        console.log(data, response)
   
         console.log("🔍 Fetched Data:", data);
   
@@ -190,7 +191,7 @@ useEffect(() => {
       console.log("📡 Requesting ETA from backend using live location...");
       if(selectedMode == "driving") {
         const response = await fetch(
-          `http://localhost:8000/api/eta?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          `http://172.30.98.73:8000/api/eta?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
         );
         const data = await response.json();
 
@@ -242,7 +243,7 @@ useEffect(() => {
       }
       if(selectedMode == "walking") {
         const response = await fetch(
-          `http://localhost:8000/api/etawalk?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          `http://172.30.98.73:8000/api/etawalk?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
         );
         const data = await response.json();
 
@@ -297,7 +298,7 @@ useEffect(() => {
       if(selectedMode == "bycycling") {
 
         const response = await fetch(
-          `http://localhost:8000/api/etabike?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          `http://172.30.98.73:8000/api/etabike?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
         );
         const data = await response.json();
 
@@ -350,7 +351,7 @@ useEffect(() => {
 
       if(selectedMode == "transit") {
         const response = await fetch(
-          `http://localhost:8000/api/etatransit?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          `http://172.30.98.73:8000/api/etatransit?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
         );
         const data = await response.json();
 

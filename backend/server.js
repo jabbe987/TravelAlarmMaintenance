@@ -100,7 +100,7 @@ app.get('/api/words', async (req, res) => {
 // ✅ API Route to Fetch Users
 app.get('/users', async (req, res) => {
     try {
-        const [users] = await db.query('SELECT * FROM users');
+        const [users] = await db.get('SELECT * FROM users');
         res.json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -119,6 +119,6 @@ app.get('/api/config', (req, res) => {
 // });
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, "localhost", () => {
-  console.log(`✅ Server is running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Server is running on http://0.0.0.0:${PORT}`);
 });
