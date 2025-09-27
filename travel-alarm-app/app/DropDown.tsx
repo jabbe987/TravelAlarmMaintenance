@@ -5,9 +5,11 @@ import { Trip, RootStackParamList } from './types';
 import Modal from 'react-native-modal';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
+import { apiUrl } from "../config";
 
 type MapScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Map'>;
 type AddTripModalNavigationProp = StackNavigationProp<RootStackParamList, 'AddTrip'>;
+
 
 const DropDown = () => {
   const [isModalVisible, setIsModalVisible] = useState(false); 
@@ -38,7 +40,7 @@ const DropDown = () => {
   };
 
   useEffect(() => {
-    axios.get('http://172.30.98.73:8000/api/locations')
+    axios.get(`${apiUrl}8000/api/locations`)
     .then(response => {
       const formattedLocations = response.data.map((loc: { Name: string; Coordinates: string; }) => ({
         label: loc.Name, 
@@ -60,7 +62,7 @@ const DropDown = () => {
 
   useEffect(() => {
     console.log("SETTING TRIPS")
-    axios.get('http://172.30.98.73:8000/api/trips')
+    axios.get(`${apiUrl}8000/api/trips`)
           .then(response => {
             console.log("SETTING TRIPS", response)
             setTrips(response.data);

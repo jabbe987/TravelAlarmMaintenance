@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, Modal, StyleSheet } from 'react-native';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
+import { apiUrl } from "../config";
 
 // Alarm sound files
 const alarmSounds = {
@@ -26,7 +27,7 @@ const TriggerAlarm: React.FC<TriggerAlarmProps> = ({ visible, onClose }) => {
       // if (!userId) return;
       const userId = 1
       try {
-        const response = await fetch(`http://172.30.98.73:8000/api/alarm/${userId}`);
+        const response = await fetch(`${apiUrl}8000/api/alarm/${userId}`);
         const data = await response.json();
 
         if (data.Alarm_ID) {
@@ -57,7 +58,7 @@ const TriggerAlarm: React.FC<TriggerAlarmProps> = ({ visible, onClose }) => {
         return;
       }
       // If ID is out of range, fallback to ID=1
-      const alarmFile = alarmSounds[selectedAlarmId] ?? alarmSounds[1];
+      const alarmFile = alarmSounds[1];
 
       try {
         console.log(`Playing alarm sound for Alarm ID=${selectedAlarmId}...`);

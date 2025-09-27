@@ -10,18 +10,18 @@ const HomeScreen = () => {
   useEffect(() => {
     const checkUser = async () => {
       // const storedUser = await AsyncStorage.getItem('selectedUser');
-      if (storedUser) {
-        navigation.replace('MainApp'); // Navigate to the main app if user is selected
-      } else {
-        setLoading(false);
-      }
+      // if (storedUser) {
+      //   navigation.replace('MainApp'); // Navigate to the main app if user is selected
+      // } else {
+      //   setLoading(false);
+      // }
     };
     checkUser();
   }, []);
 
   const selectUser = async (user: string) => {
     // await AsyncStorage.setItem('selectedUser', user);
-    navigation.replace('MainApp'); // Navigate to the main app
+    // navigation.replace('MainApp'); // Navigate to the main app
   };
 
   if (loading) {

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Modal, View, StyleSheet, Text, TouchableOpacity} from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
-import polyline from "@mapbox/polyline";
+// import polyline from "@mapbox/polyline";
 import { Trip, RootStackParamList } from "./types";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import ETAUpdater from "./ETAUpdater"; // ✅ Keeps the ETA updater for active trips
@@ -11,11 +11,13 @@ import { Picker } from '@react-native-picker/picker';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import TriggerAlarm from './TriggerAlarm';
+import { apiUrl } from "../config";
 
 
 
 const OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving";
 const GOOGLE_DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
+
 
 type MapScreenRouteProp = RouteProp<RootStackParamList, "Map">;
 type RouteCoordinate = { latitude: number; longitude: number };
@@ -39,12 +41,12 @@ const MapComponent = () => {
 
   const mapRef = useRef<MapView | null>(null);
   const route = useRoute<MapScreenRouteProp>();
-
+  console.log(apiUrl)
   // ✅ Fetch Google API Key
   useEffect(() => {
     const fetchApiKey = async () => {
       try {
-        const response = await fetch("http://172.30.98.73:8000/api/config");
+        const response = await fetch(`${apiUrl}8000/api/config`);
         const data = await response.json();
         setGoogleApiKey(data.GOOGLE_API_KEY);
         console.log("✅ Google API Key loaded:", data.GOOGLE_API_KEY);
@@ -58,13 +60,13 @@ const MapComponent = () => {
   useEffect(() => {
     const fetchAlarmSettings = async () => {
       try {
-        const userId = await AsyncStorage.getItem('selectedUser');
-        if (!userId) {
-          console.warn('⚠️ No user ID found');
-          return;
-        }
-  
-        const response = await fetch(`http://172.30.98.73:8000/api/settings/${userId}`);
+        // const userId = await AsyncStorage.getItem('selectedUser');
+        // if (!userId) {
+        //   console.warn('⚠️ No user ID found');
+        //   return;
+        // }
+        const userId = 1
+        const response = await fetch(`${apiUrl}8000/api/settings/${userId}`);
         const data = await response.json();
         console.log(data, response)
   
@@ -111,10 +113,10 @@ const MapComponent = () => {
 
     fetchGoogleETA();
 
-    intervalRef.current = setInterval(() => {
-      console.log(" Fetching updated ETA from current location...");
-      fetchGoogleETA();
-    }, 20000);
+    // intervalRef.current = setInterval(() => {
+    //   console.log(" Fetching updated ETA from current location...");
+    //   fetchGoogleETA();
+    // }, 20000);
   };
 
   const stopTrip = async () => {
@@ -191,7 +193,7 @@ useEffect(() => {
       console.log("📡 Requesting ETA from backend using live location...");
       if(selectedMode == "driving") {
         const response = await fetch(
-          `http://172.30.98.73:8000/api/eta?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          `${apiUrl}8000/api/eta?origin=${userLatitude},${userLongitude}&destination=${destination?.latitude},${destination?.longitude}`
         );
         const data = await response.json();
 
@@ -243,7 +245,7 @@ useEffect(() => {
       }
       if(selectedMode == "walking") {
         const response = await fetch(
-          `http://172.30.98.73:8000/api/etawalk?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          `${apiUrl}8000/api/etawalk?origin=${userLatitude},${userLongitude}&destination=${destination?.latitude},${destination?.longitude}`
         );
         const data = await response.json();
 
@@ -298,7 +300,7 @@ useEffect(() => {
       if(selectedMode == "bycycling") {
 
         const response = await fetch(
-          `http://172.30.98.73:8000/api/etabike?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          `${apiUrl}8000/api/etabike?origin=${userLatitude},${userLongitude}&destination=${destination?.latitude},${destination?.longitude}`
         );
         const data = await response.json();
 
@@ -351,7 +353,7 @@ useEffect(() => {
 
       if(selectedMode == "transit") {
         const response = await fetch(
-          `http://172.30.98.73:8000/api/etatransit?origin=${userLatitude},${userLongitude}&destination=${destination.latitude},${destination.longitude}`
+          `${apiUrl}8000/api/etatransit?origin=${userLatitude},${userLongitude}&destination=${destination?.latitude},${destination?.longitude}`
         );
         const data = await response.json();
 
