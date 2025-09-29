@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { apiUrl } from "../config";
 
 const DistanceView: React.FC = () => {
     const [origin, setOrigin] = useState<string>('');
@@ -15,7 +16,7 @@ const DistanceView: React.FC = () => {
             return;
         }
 
-        axios.get('http://10.82.133.250:8000/api/distance', {
+        axios.get(`${apiUrl}8000/api/distance`, {
             params: {
                 origins: origin,
                 destinations: destination

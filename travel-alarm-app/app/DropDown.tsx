@@ -19,6 +19,7 @@ const DropDown = () => {
   const [tripName, setTripName] = useState<string | null>(null);
   const navigationToMap = useNavigation<MapScreenNavigationProp>();
   const navigationToAddTrip = useNavigation<AddTripModalNavigationProp>();
+  const [tripLabels, setTripLabels] = useState<Record<number, string>>({});  
 
   const openModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
@@ -27,6 +28,24 @@ const DropDown = () => {
     setIsModalVisible(false);
     navigationToAddTrip.navigate('AddTrip', {userId: 1});
   }
+
+  useEffect(() => {
+    const computeLabels = async () => {
+      const labels: Record<number, string> = {};
+
+      for (const trip of trips) {
+        const start = await getLocation(trip.Start);
+        const end = await getLocation(trip.End);
+        labels[trip.Trip_ID] = `${start} - ${end}`;
+      }
+
+      setTripLabels(labels);
+    };
+
+    if (trips.length > 0) {
+      computeLabels();
+    }
+  }, [trips, locations]);
 
   const navigateToDetails = (value: number) => {
     const trip = trips.find((trip: { Trip_ID: number; }) => trip.Trip_ID === value);
@@ -59,7 +78,7 @@ const DropDown = () => {
         console.error('General error:', error.message);
       }
   });
-  })
+  }, [])
 
   useEffect(() => {
     console.log("SETTING TRIPS")
@@ -81,32 +100,54 @@ const DropDown = () => {
     
   }, []);
 
-  const handleSelect = (trip: Trip) => {
+  const createLocation = async (loc: string) => {
+    const responseGet = await axios.get(`${apiUrl}8000/api/distance`, {
+      params: {
+          origins: loc,
+          destinations: "Uppsala"
+      }
+    })
+    console.log(responseGet.data)
+    let data = responseGet.data.origin
 
-    let tripString = checkWhichTrip(trip)
+    let coords = data["latitude"] + ", " + data["longitude"]
+    
+    const locationObj = {"label": loc, "value": coords}
 
-    setTripName(tripString)
+    setLocations(prev => [...prev, locationObj])
+
+    return locationObj
+  }
+
+  const handleSelect = async (trip: Trip) => {
+
+    let tripString = await checkWhichTrip(trip);
+
+    setTripName(tripString);
 
     setSelectedValue(trip.Trip_ID); 
     closeModal(); 
     navigateToDetails(trip.Trip_ID);
   };
 
-  const checkWhichTrip = (trip: Trip) => {
-    let start = ""
-    let end = ""
-
-    locations.map((loc) => {
-      if (loc.value == trip.Start) {
-        start = loc.label
-      } else if (loc.value == trip.End) {
-        end = loc.label
+  const getLocation = async (tripLoc: string) => {  
+    console.log(tripLoc)
+    for (const loc of locations) {
+      if (loc.value === tripLoc) {
+        return loc.label;
       }
-    });
-    
-    return start + " - " + end
+    }
+    const newLoc = await createLocation(tripLoc);
+
+    return newLoc.label;
   }
 
+  const checkWhichTrip = async (trip: Trip) => {
+    let start = await getLocation(trip.Start);
+    let end = await getLocation(trip.End);
+
+    return start + " - " + end;
+  }
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={openModal} style={styles.button}>
@@ -125,7 +166,7 @@ const DropDown = () => {
               onPress={() => handleSelect(trip)}
               style={styles.option}
             >
-              <Text style={styles.optionText}>{checkWhichTrip(trip)}</Text>
+              <Text style={styles.optionText}>{tripLabels[trip.Trip_ID] ?? "Loading..."}</Text>
             </TouchableOpacity>
           ))}
 

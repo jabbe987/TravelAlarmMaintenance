@@ -69,7 +69,7 @@ router.get('/distance', async (req, res) => {
             });
         }
 
-        const elements = distanceResponse.data.rows[0].elements[0];
+        const elements = distanceResponse.data.rows[0].elements[0]; 
         if (!elements || elements.status !== 'OK') {
             return res.status(400).json({
                 error: 'No distance data available.',

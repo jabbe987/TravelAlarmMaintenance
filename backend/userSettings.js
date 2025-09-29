@@ -44,7 +44,9 @@ router.get('/settings/:userId', (req, res) => {
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
 
-            console.log("UAUUAUA", results)
+            if (results === undefined) {
+                return res.status(404).json({ error: 'User not found' });
+            }
             if (results.length === 0) {
                 return res.status(404).json({ error: 'User not found' });
             }
