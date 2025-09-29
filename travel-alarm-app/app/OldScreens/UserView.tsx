@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import axios from 'axios';
-import { apiUrl } from "../config";
+import { apiUrl } from "../../config";
 
 const UserView: React.FC = () => {
     const [words, setWords] = useState<string>('');

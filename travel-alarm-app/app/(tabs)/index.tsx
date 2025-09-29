@@ -46,13 +46,10 @@ export default function HomeScreen() {
       <Text style={styles.title}>Welcome to Travel Alarm</Text>
 
       {/* Button to User View */}
-      <Button title="Go to User View" onPress={() => router.push("/UserView")} />
+      <Button title="Go to User View" onPress={() => router.push("/OldScreens/UserView")} />
 
       {/* Button to Map View */}
-      {Platform.OS !== "web" && <Button title="Go to Map View" onPress={() => router.push("/Map")} />}
-
-      {/* Button to Web Map View */}
-      {Platform.OS === "web" && <Button title="Go to Map View Leaflet" onPress={() => router.push("/WebMap")} />}
+      <Button title="Go to Map View" onPress={() => router.push("/Map")} />
 
       {/* 🚀 New Button to Distance View */}
       <Button title="Go to Distance View" onPress={() => router.push("/DistanceView")} />
@@ -61,7 +58,7 @@ export default function HomeScreen() {
       <Button title="Settings" onPress={() => router.push("/SettingsView")} />
         
       {/* 🚀 New Button to Sound View */}
-      <Button title="Go to Sound View" onPress={() => router.push("/SoundView")} />
+      <Button title="Go to Sound View" onPress={() => router.push("/OldScreens/SoundView")} />
     </View>
   );
 }

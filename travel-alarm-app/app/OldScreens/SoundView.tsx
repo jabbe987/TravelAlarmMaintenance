@@ -2,23 +2,23 @@
 import React, { useState } from 'react';
 import { View, Text, Button, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
-import TriggerAlarm from './TriggerAlarm'; //TriggerAlarm component
+import TriggerAlarm from "@/components/TriggerAlarm";
 
 // Define your available sounds
 const soundFiles = [
   {
     name: 'Retro Alarm',
-    file: require('../assets/sounds/mixkit-retro-game-emergency-alarm-1000.wav'),
+    file: require('../../assets/sounds/mixkit-retro-game-emergency-alarm-1000.wav'),
   },
 
   {
     name: 'Slot Machine',
-    file: require('../assets/sounds/mixkit-slot-machine-payout-alarm-1996.wav'),
+    file: require('../../assets/sounds/mixkit-slot-machine-payout-alarm-1996.wav'),
   },
 
   {
     name: 'Beep',
-    file: require('../assets/sounds/mixkit-alarm-digital-clock-beep-989.wav'),
+    file: require('../../assets/sounds/mixkit-alarm-digital-clock-beep-989.wav'),
   },
 ];
 

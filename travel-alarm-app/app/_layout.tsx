@@ -6,7 +6,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect} from 'react';
 import 'react-native-reanimated';
-import DropDown from "./DropDown";
+import React from 'react';
+import Dropdown from "@/components/Dropdown";
 
 
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -36,7 +37,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="UserView" options={{ title: "User View" }} />
-        <Stack.Screen name="Map" options={{ title: "Map View", headerTitleAlign:"center", headerTitleStyle: {fontSize: 18, maxWidth: 200}, headerRight: () => (<DropDown/>)}}/>
+        <Stack.Screen name="Map" options={{ title: "Map View", headerTitleAlign:"center", headerTitleStyle: {fontSize: 18}, headerRight: () => (<Dropdown/>)}}/>
         <Stack.Screen name="WebMap" options={{title: "Web Map View" }}/>
         <Stack.Screen name="DistanceView" options={{ title: "Distance API view"}}/>
         <Stack.Screen name="SoundView" options={{ title: 'Sound Selection' }} />

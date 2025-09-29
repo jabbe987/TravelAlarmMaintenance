@@ -2,15 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import { Modal, View, StyleSheet, Text, TouchableOpacity} from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
-// import polyline from "@mapbox/polyline";
+import polyline from "@mapbox/polyline";
 import { Trip, RootStackParamList } from "./types";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import ETAUpdater from "./ETAUpdater"; // ✅ Keeps the ETA updater for active trips
+import ETAUpdater from "@/components/ETAUpdater";
 import { selectionAsync } from "expo-haptics";
 import { Picker } from '@react-native-picker/picker';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
-import TriggerAlarm from './TriggerAlarm';
+import TriggerAlarm from "@/components/TriggerAlarm";
 import { apiUrl } from "../config";
 
 
@@ -297,7 +297,7 @@ useEffect(() => {
 
       }
 
-      if(selectedMode == "bycycling") {
+      if(selectedMode == "bicycling") {
 
         const response = await fetch(
           `${apiUrl}8000/api/etabike?origin=${userLatitude},${userLongitude}&destination=${destination?.latitude},${destination?.longitude}`
