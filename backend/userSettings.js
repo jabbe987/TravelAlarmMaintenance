@@ -44,11 +44,11 @@ router.get('/settings/:userId', (req, res) => {
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
 
+            console.log("UAUUAUA", results)
             if (results.length === 0) {
                 return res.status(404).json({ error: 'User not found' });
             }
-
-            res.json(results[0]); // ✅ Send JSON with converted BIT(1) as integer
+            return res.json(results[0]); // ✅ Send JSON with converted BIT(1) as integer
         }
     );
 });
@@ -73,7 +73,7 @@ router.post('/settings', (req, res) => {
                 return res.status(404).json({ error: 'User not found' });
             }
 
-            res.json({ message: 'Settings updated successfully' });
+            return res.json({ message: 'Settings updated successfully' });
         }
     );
 });
@@ -88,7 +88,7 @@ router.get('/alarm/:userId', (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        res.json(results[0]); // Return alarm ID
+        return res.json(results[0]); // Return alarm ID
     });
 });
 
@@ -106,7 +106,7 @@ router.post('/alarm', (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        res.json({ message: 'Alarm sound updated successfully' });
+        return res.json({ message: 'Alarm sound updated successfully' });
     });
 });
 

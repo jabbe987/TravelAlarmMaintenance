@@ -36,10 +36,10 @@ const router = express.Router();
 // List all trips
 router.get('/trips', (req, res) => {
     // console.log("LISTING TRIPS LOCALLY")
-    db.get('SELECT * FROM Trip', (err, results) => {
+    db.all('SELECT * FROM Trip', (err, results) => {
         console.log(results)
         if (err) return res.status(500).json({ error: err.message });
-        res.json(results);
+        return res.json(results);
     });
 });
 
@@ -49,7 +49,7 @@ router.get('/trips/:id', (req, res) => {
     db.get('SELECT * FROM Trip WHERE Trip_ID = ?', [tripId], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) return res.status(404).json({ error: 'Trip not found' });
-        res.json(results);
+        return res.json(results);
     });
 });
 
@@ -81,7 +81,7 @@ router.post('/addtrip', (req, res) => {
         (err, results) => {
             // console.log("RESULT: ", err, results)
             if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Trip added successfully', id: results.insertId });
+            return res.json({ message: 'Trip added successfully', id: results.insertId });
         }
     );
 
@@ -97,7 +97,7 @@ router.put('/trips/start/:id', (req, res) => {
         [start_time, tripId],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Trip started successfully' });
+            return res.json({ message: 'Trip started successfully' });
         }
     );
 });
@@ -111,7 +111,7 @@ router.put('/trips/stop/:id', (req, res) => {
         [end_time, tripId],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Trip stopped successfully' });
+            return res.json({ message: 'Trip stopped successfully' });
         }
     );
 });
@@ -124,7 +124,7 @@ router.post('/alarms', (req, res) => {
         [trip_id, alarm_time, status || 'active'],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Alarm set successfully', alarmId: result.insertId });
+            return res.json({ message: 'Alarm set successfully', alarmId: result.insertId });
         }
     );
 });
@@ -137,7 +137,7 @@ router.put('/alarms/dismiss/:id', (req, res) => {
         [alarmId],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Alarm dismissed successfully' });
+            return res.json({ message: 'Alarm dismissed successfully' });
         }
     );
 });

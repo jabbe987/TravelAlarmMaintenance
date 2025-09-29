@@ -61,7 +61,7 @@ console.log(tripRoutes);
 // });
 
 // // Sample API route
-// app.get('/users', (req, res) => {
+// app.all('/users', (req, res) => {
 //     db.query('SELECT * FROM users', (err, results) => {
 //         if (err) {
 //             res.status(500).json({ error: err.message });

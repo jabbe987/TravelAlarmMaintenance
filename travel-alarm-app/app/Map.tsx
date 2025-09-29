@@ -41,13 +41,13 @@ const MapComponent = () => {
 
   const mapRef = useRef<MapView | null>(null);
   const route = useRoute<MapScreenRouteProp>();
-  console.log(apiUrl)
   // ✅ Fetch Google API Key
   useEffect(() => {
     const fetchApiKey = async () => {
       try {
         const response = await fetch(`${apiUrl}8000/api/config`);
         const data = await response.json();
+        console.log("RESPONSE: ", response, data)
         setGoogleApiKey(data.GOOGLE_API_KEY);
         console.log("✅ Google API Key loaded:", data.GOOGLE_API_KEY);
       } catch (error) {

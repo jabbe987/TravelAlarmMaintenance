@@ -15,7 +15,7 @@ const DropDown = () => {
   const [isModalVisible, setIsModalVisible] = useState(false); 
   const [selectedValue, setSelectedValue] = useState<number | null>(null);
   const [locations, setLocations] = useState<Array<{ label: string; value: string}>>([]);
-  const [trips, setTrips] = useState<Trip[]>([]); 
+  const [trips,  setTrips] = useState<Trip[]>([]); 
   const [tripName, setTripName] = useState<string | null>(null);
   const navigationToMap = useNavigation<MapScreenNavigationProp>();
   const navigationToAddTrip = useNavigation<AddTripModalNavigationProp>();
@@ -42,7 +42,8 @@ const DropDown = () => {
   useEffect(() => {
     axios.get(`${apiUrl}8000/api/locations`)
     .then(response => {
-      const formattedLocations = response.data.map((loc: { Name: string; Coordinates: string; }) => ({
+      const location = response.data
+      const formattedLocations = location.map((loc: { Name: string; Coordinates: string; }) => ({
         label: loc.Name, 
         value: loc.Coordinates,   
     }));
@@ -64,7 +65,7 @@ const DropDown = () => {
     console.log("SETTING TRIPS")
     axios.get(`${apiUrl}8000/api/trips`)
           .then(response => {
-            console.log("SETTING TRIPS", response)
+            console.log("SETTING TRIPS", response.data)
             setTrips(response.data);
           })
           .catch(error => {
@@ -78,7 +79,7 @@ const DropDown = () => {
             }
         });
     
-  });
+  }, []);
 
   const handleSelect = (trip: Trip) => {
 
@@ -102,7 +103,7 @@ const DropDown = () => {
         end = loc.label
       }
     });
-
+    
     return start + " - " + end
   }
 

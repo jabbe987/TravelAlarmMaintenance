@@ -26,9 +26,9 @@ const router = express.Router();
 
 // Get all locations
 router.get('/locations', (req, res) => {
-    db.get('SELECT * FROM Location', (err, results) => {
+    db.all('SELECT * FROM Location', (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json(results);
+        return res.json(results);
     });
 });
 
@@ -43,7 +43,7 @@ router.post('/addLocation', (req, res) => {
         [label, value],
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Location added successfully', id: results.insertId });
+            return res.json({ message: 'Location added successfully', id: results.insertId });
         }
     );
 })
