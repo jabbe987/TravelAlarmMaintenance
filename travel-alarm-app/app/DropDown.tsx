@@ -30,20 +30,20 @@ const DropDown = () => {
   }
 
   useEffect(() => {
-    const computeLabels = async () => {
+    const getTripLabels = () => {
       const labels: Record<number, string> = {};
 
-      for (const trip of trips) {
+      trips.forEach(async trip => {
         const start = await getLocation(trip.Start);
         const end = await getLocation(trip.End);
         labels[trip.Trip_ID] = `${start} - ${end}`;
-      }
+      })
 
       setTripLabels(labels);
     };
 
     if (trips.length > 0) {
-      computeLabels();
+      getTripLabels();
     }
   }, [trips, locations]);
 
@@ -107,12 +107,12 @@ const DropDown = () => {
           destinations: "Uppsala"
       }
     })
-    console.log(responseGet.data)
+
     let data = responseGet.data.origin
 
-    let coords = data["latitude"] + ", " + data["longitude"]
+    let name = data["name"]
     
-    const locationObj = {"label": loc, "value": coords}
+    const locationObj = {"label": name, "value": loc}
 
     setLocations(prev => [...prev, locationObj])
 
@@ -131,12 +131,12 @@ const DropDown = () => {
   };
 
   const getLocation = async (tripLoc: string) => {  
-    console.log(tripLoc)
-    for (const loc of locations) {
+    locations.forEach(loc => {
       if (loc.value === tripLoc) {
         return loc.label;
       }
-    }
+    })
+    
     const newLoc = await createLocation(tripLoc);
 
     return newLoc.label;
