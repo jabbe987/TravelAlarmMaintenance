@@ -100,6 +100,17 @@ const DropDown = () => {
     
   }, []);
 
+  const addLocation = async (loc: Object) => {
+    await axios.post(`${apiUrl}8000/api/addLocation`, 
+      { loc })
+      .then(response => {
+        console.log("Success", response)
+      })
+      .catch(error => {
+        console.log("Error posting locations - ", error)
+      })
+  }
+
   const createLocation = async (loc: string) => {
     const responseGet = await axios.get(`${apiUrl}8000/api/distance`, {
       params: {
@@ -115,6 +126,8 @@ const DropDown = () => {
     const locationObj = {"label": name, "value": loc}
 
     setLocations(prev => [...prev, locationObj])
+
+    addLocation(locationObj) // adds location to db
 
     return locationObj
   }
