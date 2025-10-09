@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect} from 'react';
 import 'react-native-reanimated';
 import React from 'react';
+import Toast from 'react-native-toast-message';
 import Dropdown from "@/components/Dropdown";
 
 
@@ -43,6 +44,8 @@ export default function RootLayout() {
         <Stack.Screen name="SoundView" options={{ title: 'Sound Selection' }} />
         <Stack.Screen name="+not-found" />
       </Stack>
+
+      <Toast />
       <StatusBar style="auto" />
     </ThemeProvider>
   );

@@ -12,6 +12,7 @@ import { Picker } from '@react-native-picker/picker';
 import { Audio } from 'expo-av';
 import TriggerAlarm from "@/components/TriggerAlarm";
 import { apiUrl } from "../config";
+import Toast from 'react-native-toast-message';
 
 
 
@@ -66,8 +67,10 @@ const MapComponent = () => {
         //   return;
         // }
         const userId = 1
+        console.log("hejsan");
         const response = await fetch(`${apiUrl}8000/api/settings/${userId}`);
         const data = await response.json();
+        console.log("format data.AlarmValue: ", data.AlarmValue);
         console.log(data, response)
   
         console.log("🔍 Fetched Data:", data);
@@ -80,7 +83,7 @@ const MapComponent = () => {
         } else {
           console.warn("⚠️ Unknown AlarmType:", data.AlarmType);
         }
-  
+        
         setAlarmValue(data.AlarmValue);
   
         console.log(`✅ Alarm settings loaded: Type = ${data.AlarmType}, Value = ${data.AlarmValue}`);
@@ -98,10 +101,22 @@ const MapComponent = () => {
   
 
   const startTrip = async () => {
-    // if(selectedMode!) {
-    //   console.log("Please select a mode first!");
-    //   return;
-    // }
+    if(selectedMode == '') {
+      console.log("Please select a mode first!");
+      Toast.show({
+        type: 'error',
+        text1: 'Please select a mode first!'
+      });
+      return;
+    }
+    if(origin == null || destination == null) {
+      console.log("Please select a trip"); 
+      Toast.show({
+        type:'error',
+        text1: 'Please select a trip!'
+      });
+      return; 
+    }
     console.log("Starting Trip");
     setIsActiveTrip(true);
     setShowDropdown(false);
@@ -183,8 +198,9 @@ useEffect(() => {
   
       console.log("📍 Current device location:", userLatitude, userLongitude);
 
-      
+      console.log("Before destination origin print");
       console.log(destination, origin)
+      console.log("directly after destination origin print");
   
       // if (!destination) {
       //   console.error("❌ Destination is missing");
