@@ -43,7 +43,7 @@ router.post('/addLocation', (req, res) => {
         [label, value],
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
-            return res.json({ message: 'Location added successfully', id: results.insertId });
+            return res.json({ message: 'Location added successfully' });
         }
     );
 })

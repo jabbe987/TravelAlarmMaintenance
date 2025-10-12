@@ -112,16 +112,17 @@ const DropDown = () => {
   }
 
   const createLocation = async (loc: string) => {
-    const responseGet = await axios.get(`${apiUrl}8000/api/distance`, {
+    const [latStr, lngStr] = loc.split(",")
+    const responseGet = await axios.get(`${apiUrl}8000/api/getCityNameFromCoords`, {
       params: {
-          origins: loc,
-          destinations: "Uppsala"
+          lat: latStr,
+          long: lngStr
       }
     })
 
-    let data = responseGet.data.origin
+    let data = responseGet.data
 
-    let name = data["name"]
+    let name = data["city"]
     
     const locationObj = {"label": name, "value": loc}
 

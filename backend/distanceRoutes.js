@@ -75,20 +75,18 @@ router.get('/distance', async (req, res) => {
                 error: 'No distance data available.',
                 details: elements?.status || 'Unknown error.',
             });
-        }
+        }   
 
         const distance = elements.distance.text;
         const duration = elements.duration.text;
 
         // Send coordinates, distance, and duration in the response
-        // res.json({
-        //     origin: originCoords,
-        //     destination: destinationCoords,
-        //     distance,
-        //     duration,
-        // });
-        res.json(distanceResponse.data);
-
+        res.json({
+            origin: originCoords,
+            destination: destinationCoords,
+            distance,
+            duration,
+        });
     } catch (error) {
         console.error("Error fetching data:", error.message);
         res.status(500).json({
@@ -97,5 +95,23 @@ router.get('/distance', async (req, res) => {
         });
     }
 });
+
+req.get('/getCityNameFromCoords', async(req, res) => {
+    const {lat, lang} = req.query
+
+    try {
+        const result = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat, lang}&key=${GOOGLE_API_KEY}&result_type=locality|postal_town`;
+
+        const city = result.result.address_components.long_name
+
+        res.json({city: city, status: 'ok'})
+    } catch (error) {
+        console.error("Error fetching city from api", error.message)
+        res.status(500).json({
+            error: 'Failed to fetch data.',
+            details: error.message
+        });
+    }
+})
 
 export default router;

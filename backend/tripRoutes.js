@@ -81,7 +81,7 @@ router.post('/addtrip', (req, res) => {
         (err, results) => {
             // console.log("RESULT: ", err, results)
             if (err) return res.status(500).json({ error: err.message });
-            return res.json({ message: 'Trip added successfully', id: results.insertId });
+            return res.json({ message: 'Trip added successfully'});
         }
     );
 
@@ -124,7 +124,7 @@ router.post('/alarms', (req, res) => {
         [trip_id, alarm_time, status || 'active'],
         (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
-            return res.json({ message: 'Alarm set successfully', alarmId: result.insertId });
+            return res.json({ message: 'Alarm set successfully' });
         }
     );
 });

@@ -128,6 +128,7 @@ const AddTrip = () => {
 
           let data = responseGet.data.origin
 
+
           startCoordString = data["latitude"] + ", " + data["longitude"]
           console.log("START COORD STRING SET", startCoordString)
           setStartCoord(startCoordString)
@@ -186,6 +187,7 @@ const AddTrip = () => {
     }
 
     const closeDropdownStart = (val: boolean) => {
+      console.log(val)
       setShowStartPoint(!val)
     }
 
@@ -202,6 +204,9 @@ const AddTrip = () => {
                   onChangeText={((value) => handleChange(value, "START"))}
                   placeholder="Type to search..."
                   style={styles.input}
+                  onSubmitEditing={() => {
+                    setShowStartPoint(false);
+                  }}
                 />
                 {showStartPoint && filteredLocations.length > 0 && startPoint != null && startPoint.length > 0 &&  (
                   <TouchableWithoutFeedback onPress={() => closeDropdownStart(showStartPoint)}> 
@@ -211,7 +216,7 @@ const AddTrip = () => {
                       keyExtractor={(item) => item.label}
                       renderItem={({ item }) => (
                         <TouchableOpacity onPress={() => {setStartPoint(item.label); closeDropdownStart(showStartPoint)}}>
-                          <Text style={styles.listItem}>{item.label}</Text>
+                          <Text style={styles.listItem} >{item.label}</Text>
                         </TouchableOpacity>
                       )}
                     />
@@ -226,6 +231,9 @@ const AddTrip = () => {
                   onChangeText={((value) => handleChange(value, "END"))}
                   placeholder="Type to search..."
                   style={styles.input}
+                  onSubmitEditing={() => {
+                    setShowStartPoint(false);
+                  }}
                 />
                 {showEndPoint && filteredLocations.length > 0 && endPoint != null && endPoint.length > 0 &&  (
                   <TouchableWithoutFeedback onPress={() => closeDropdownEnd(showEndPoint)}> 
