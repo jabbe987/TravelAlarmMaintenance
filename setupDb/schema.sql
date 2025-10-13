@@ -12,7 +12,8 @@ CREATE TABLE Trip (
 CREATE TABLE User (
     User_ID INTEGER PRIMARY KEY AUTOINCREMENT,
     AlarmType INTEGER,
-    AlarmValue INTEGER
+    AlarmValue INTEGER,
+    Alarm_ID INTEGER
 );
 
 CREATE TABLE Alarm (
