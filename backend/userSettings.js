@@ -1,115 +1,75 @@
-import dotenv from "dotenv";
-dotenv.config();
+import 'dotenv/config';
+import express from 'express';
+import sqlite3 from 'sqlite3';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-import express from "express";
-
-import sqlite3 from "sqlite3";
-
-import { fileURLToPath } from "url";
-import path from "path";
-
-// Resolve __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname  = path.dirname(__filename);
 
-// Use DB_PATH from .env or fallback
-const dbPath = process.env.DB_PATH || path.join(__dirname, "travelAlarm.db");
-
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'travelAlarm.db');
 const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error("❌ Could not connect to database:", err.message);
-  } else {
-    console.log(`✅ Connected to SQLite database at ${dbPath}`);
-  }
+  if (err) console.error('❌ DB connect error:', err.message);
+  else console.log(`✅ Connected to SQLite at ${dbPath}`);
 });
 
 const router = express.Router();
 
-// Database connection
-// const db = mysql.createConnection({
-//     host: process.env.DB_HOST,
-//     user: process.env.DB_USER,
-//     password: process.env.DB_PASS,
-//     database: process.env.DB_NAME,
-//     port: process.env.DB_PORT
-// });
-
-// 🔹 Get user settings (Convert BIT(1) properly)
+// GET /settings/:userId  — returnera EN rad (objekt)
 router.get('/settings/:userId', (req, res) => {
-    const { userId } = req.params;
+  const { userId } = req.params;
 
-    db.get(
-        'SELECT User_ID, CAST(AlarmType AS UNSIGNED) AS AlarmType, AlarmValue FROM User WHERE User_ID = ?',
-        [userId],
-        (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
-
-            if (results === undefined) {
-                return res.status(404).json({ error: 'User not found' });
-            }
-            if (results.length === 0) {
-                return res.status(404).json({ error: 'User not found' });
-            }
-            return res.json(results[0]); // ✅ Send JSON with converted BIT(1) as integer
-        }
-    );
-});
-
-// 🔹 Update user settings (Handle BIT(1) correctly)
-router.post('/settings', (req, res) => {
-    const { userId, alarmType, alarmValue } = req.body;
-
-    if (userId === undefined || alarmType === undefined || alarmValue === undefined) {
-        return res.status(400).json({ error: 'Missing required fields' });
+  db.get(
+    // SQLite: INTEGER istället för UNSIGNED
+    'SELECT User_ID, CAST(AlarmType AS INTEGER) AS AlarmType, AlarmValue FROM User WHERE User_ID = ?',
+    [userId],
+    (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!row) return res.status(404).json({ error: 'User not found' });
+      return res.json(row);           // ✅ skicka objektet (inte results[0])
     }
-
-    const bitAlarmType = alarmType ? 1 : 0; // Ensure 0 or 1
-
-    db.run(
-        'UPDATE User SET AlarmType = ?, AlarmValue = ? WHERE User_ID = ?',
-        [bitAlarmType, alarmValue, userId],
-        (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
-
-            if (results.affectedRows === 0) {
-                return res.status(404).json({ error: 'User not found' });
-            }
-
-            return res.json({ message: 'Settings updated successfully' });
-        }
-    );
+  );
 });
 
+// POST /settings — uppdatera & använd this.changes
+router.post('/settings', express.json(), (req, res) => {
+  const { userId, alarmType, alarmValue } = req.body;
+  if (userId == null || alarmType == null || alarmValue == null) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  const bitAlarmType = alarmType ? 1 : 0;
+
+  db.run(
+    'UPDATE User SET AlarmType = ?, AlarmValue = ? WHERE User_ID = ?',
+    [bitAlarmType, alarmValue, userId],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) return res.status(404).json({ error: 'User not found' });
+      return res.json({ message: 'Settings updated successfully' });
+    }
+  );
+});
+
+// GET /alarm/:userId — returnera EN rad
 router.get('/alarm/:userId', (req, res) => {
-    const { userId } = req.params;
-
-    db.get('SELECT Alarm_ID FROM User WHERE User_ID = ?', [userId], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-
-        if (results.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        return res.json(results[0]); // Return alarm ID
-    });
+  const { userId } = req.params;
+  db.get('SELECT Alarm_ID FROM User WHERE User_ID = ?', [userId], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: 'User not found' });
+    return res.json(row);
+  });
 });
 
-router.post('/alarm', (req, res) => {
-    const { userId, alarmId } = req.body;
+// POST /alarm — uppdatera & använd this.changes
+router.post('/alarm', express.json(), (req, res) => {
+  const { userId, alarmId } = req.body;
+  if (!userId || !alarmId) return res.status(400).json({ error: 'Missing required fields' });
 
-    if (!userId || !alarmId) {
-        return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    db.run('UPDATE User SET Alarm_ID = ? WHERE User_ID = ?', [alarmId, userId], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-
-        if (results.affectedRows === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        return res.json({ message: 'Alarm sound updated successfully' });
-    });
+  db.run('UPDATE User SET Alarm_ID = ? WHERE User_ID = ?', [alarmId, userId], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    if (this.changes === 0) return res.status(404).json({ error: 'User not found' });
+    return res.json({ message: 'Alarm sound updated successfully' });
+  });
 });
 
 export default router;

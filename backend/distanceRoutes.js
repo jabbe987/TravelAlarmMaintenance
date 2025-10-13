@@ -96,7 +96,7 @@ router.get('/distance', async (req, res) => {
     }
 });
 
-req.get('/getCityNameFromCoords', async(req, res) => {
+router.get('/getCityNameFromCoords', async(req, res) => {
     const {lat, lang} = req.query
 
     try {

@@ -8,7 +8,7 @@ import {
   TextInput,
   StyleSheet
 } from 'react-native';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Audio } from 'expo-av';
 import { apiUrl } from "../config";
@@ -42,10 +42,12 @@ export default function SettingsView() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        // const userId = await AsyncStorage.getItem('selectedUser');
-        // if (!userId) return;
+        const userId = await AsyncStorage.getItem('selectedUser');
+        if (!userId) return;
 
-        const response = await fetch(`${apiUrl}8000/api/settings/${1}`);
+        const url = `${apiUrl}8000/api/settings/${userId}`;
+        console.log("🔍 Fetching from URL:", url);
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch user settings');
 
         const data = await response.json();
@@ -111,7 +113,8 @@ export default function SettingsView() {
     if (tempSelectedAlarm === null) return;
 
     stopSound();
-    const userId = 1
+    const userId = await AsyncStorage.getItem('selectedUser');
+    if (!userId) return;
 
     try {
       const response = await fetch(`${apiUrl}8000/api/alarm`, {
@@ -137,11 +140,11 @@ export default function SettingsView() {
   // ─────────────────────────────────────────────────────
   const handleSaveSettings = async () => {
     try {
-      const userId = 1
-      // if (!userId) {
-      //   alert('No user found');
-      //   return;
-      // }
+      const userId = await AsyncStorage.getItem('selectedUser');
+      if (!userId) {
+        alert('No user found');
+        return;
+      }
       const alarmValue = alarmType === 'distance' ? distance : time;
       const alarmTypeBit = alarmType === 'distance' ? 0 : 1;
 
@@ -182,14 +185,14 @@ export default function SettingsView() {
       <Button title="Set Alarm by Distance/Time" onPress={() => setModalVisible(true)} />
 
       {/* CHANGE USER BUTTON */}
-      {/* <Button
+      <Button
         title="Change User"
         onPress={async () => {
           await AsyncStorage.removeItem('selectedUser');
           router.replace('/');
         }}
         color="red"
-      /> */}
+      />
 
       {/* ───────────────────────────────────────────────── */}
       {/* MODAL for ALARM SOUND SELECTION */}
